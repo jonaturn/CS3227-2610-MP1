@@ -1,7 +1,10 @@
+import java.util.Scanner;
+
 /**
  * Runs the Staniz personal assistant chatbot.
  */
 public class Staniz {
+    private static final String EXIT_COMMAND = "bye";
     private static final String BANNER = " ____ _____  _    _   _ ___ _____\n"
             + "/ ___|_   _|/ \\  | \\ | |_ _|__  /\n"
             + "\\___ \\ | | / _ \\ |  \\| || |  / /\n"
@@ -12,13 +15,24 @@ public class Staniz {
     private static final String FAREWELL = "Bye. Hope to see you again soon!";
 
     /**
-     * Starts Staniz, displays its banner and greeting, and exits with a farewell.
+     * Starts Staniz and echoes user input until the exit command is entered.
      *
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
         System.out.println(BANNER);
         System.out.println(GREETING);
+
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (scanner.hasNextLine()) {
+                String input = scanner.nextLine();
+                if (EXIT_COMMAND.equals(input)) {
+                    break;
+                }
+                System.out.println(input);
+            }
+        }
+
         System.out.println(FAREWELL);
     }
 }
