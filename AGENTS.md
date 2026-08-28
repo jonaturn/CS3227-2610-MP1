@@ -9,8 +9,8 @@ Unless the user says otherwise, assume that you are assisting a student working 
 # Student profile
 
 * Prior knowledge: Basic Java and OOP concepts.
-* Level of programming experience: [to be filled]
-* IDE and level of expertise: [to be filled]
+* Level of programming experience: Fairly experienced, with multiple internships; soon-to-be graduate.
+* IDE and level of expertise: Visual Studio Code; primary IDE used throughout internships and personal projects, ranging from simple applications to complex projects.
 
 # Guidance for interacting with users
 
