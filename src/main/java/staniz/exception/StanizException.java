@@ -1,3 +1,5 @@
+package staniz.exception;
+
 /**
  * Represents a user-facing error caused by an invalid Staniz command.
  */

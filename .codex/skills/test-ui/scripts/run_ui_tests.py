@@ -38,7 +38,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--main-class",
-        default="Staniz",
+        default="staniz.Staniz",
         help="fully qualified application entry point",
     )
     parser.add_argument(
@@ -81,7 +81,7 @@ def require_java_25(java_executable: str) -> None:
 
 def compile_sources(javac_executable: str, source_dir: Path, classes_dir: Path) -> None:
     """Compile every Java source file into the temporary classes directory."""
-    sources = sorted(source_dir.glob("*.java"))
+    sources = sorted(source_dir.rglob("*.java"))
     if not sources:
         raise RuntimeError(f"No Java sources found in {source_dir.resolve()}")
 

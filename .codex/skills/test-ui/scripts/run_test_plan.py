@@ -57,7 +57,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--main-class",
-        default="Staniz",
+        default="staniz.Staniz",
         help="fully qualified application entry point",
     )
     parser.add_argument(

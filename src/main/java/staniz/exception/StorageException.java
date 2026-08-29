@@ -1,3 +1,5 @@
+package staniz.exception;
+
 /**
  * Represents a failure to read or write Staniz task data.
  */

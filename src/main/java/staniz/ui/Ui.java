@@ -1,4 +1,9 @@
+package staniz.ui;
+
 import java.util.Scanner;
+
+import staniz.task.Task;
+import staniz.task.TaskList;
 
 /**
  * Handles all console interactions between Staniz and the user.

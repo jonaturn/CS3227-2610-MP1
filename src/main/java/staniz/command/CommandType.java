@@ -1,3 +1,5 @@
+package staniz.command;
+
 /**
  * Identifies the commands currently supported by Staniz.
  */

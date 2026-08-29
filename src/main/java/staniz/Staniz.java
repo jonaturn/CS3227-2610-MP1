@@ -1,3 +1,14 @@
+package staniz;
+
+import staniz.command.CommandType;
+import staniz.exception.StanizException;
+import staniz.exception.StorageException;
+import staniz.parser.Parser;
+import staniz.storage.Storage;
+import staniz.task.Task;
+import staniz.task.TaskList;
+import staniz.ui.Ui;
+
 /**
  * Runs the Staniz personal assistant chatbot.
  */
