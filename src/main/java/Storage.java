@@ -58,17 +58,17 @@ public class Storage {
     /**
      * Replaces the data file with the current ordered task list.
      *
-     * @param tasks tasks to persist
+     * @param taskList tasks to persist
      * @throws StorageException if directories or the data file cannot be written
      */
-    public void save(List<Task> tasks) throws StorageException {
+    public void save(TaskList taskList) throws StorageException {
         try {
             Path parentDirectory = filePath.getParent();
             if (parentDirectory != null) {
                 Files.createDirectories(parentDirectory);
             }
 
-            List<String> lines = tasks.stream()
+            List<String> lines = taskList.getTasks().stream()
                     .map(Task::toDataString)
                     .toList();
             Files.write(filePath, lines, StandardCharsets.UTF_8,
