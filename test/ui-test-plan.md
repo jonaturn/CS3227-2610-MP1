@@ -103,7 +103,7 @@ Expected output:
 OOPS! Please enter a command.
 OOPS! A todo needs a description. Try: todo borrow book
 added: [T][ ] borrow book
-OOPS! I don't recognize that command. Try todo, deadline, event, list, mark, unmark, or bye.
+OOPS! I don't recognize that command. Try todo, deadline, event, list, mark, unmark, delete, or bye.
 1.[T][ ] borrow book
 ```
 
@@ -177,5 +177,67 @@ OOPS! There is no task numbered -1. Your list currently has 1 task(s).
   [T][X] borrow book
 OOPS! 'unmark' needs a task number. Try: unmark 1
   [T][ ] borrow book
+1.[T][ ] borrow book
+```
+
+## Case 7: Delete tasks and renumber the list
+
+Aim: Confirm that deleting middle, last, and only remaining tasks preserves order and reports the correct count.
+
+Input:
+
+```text
+todo first task
+deadline middle task /by Sunday
+event last task /from Mon 2pm /to 4pm
+delete 2
+list
+delete 2
+delete 1
+list
+bye
+```
+
+Expected output:
+
+```text
+Noted. I've removed this task:
+  [D][ ] middle task (by: Sunday)
+Now you have 2 tasks in the list.
+1.[T][ ] first task
+2.[E][ ] last task (from: Mon 2pm to: 4pm)
+Noted. I've removed this task:
+  [E][ ] last task (from: Mon 2pm to: 4pm)
+Now you have 1 task in the list.
+Noted. I've removed this task:
+  [T][ ] first task
+Now you have 0 tasks in the list.
+Here are the tasks in your list:
+```
+
+## Case 8: Reject invalid delete task numbers
+
+Aim: Confirm that invalid delete commands are explained and leave the task list unchanged.
+
+Input:
+
+```text
+todo borrow book
+delete
+delete two
+delete 0
+delete 2
+list
+bye
+```
+
+Expected output:
+
+```text
+added: [T][ ] borrow book
+OOPS! 'delete' needs a task number. Try: delete 1
+OOPS! The task number must be a whole number.
+OOPS! There is no task numbered 0. Your list currently has 1 task(s).
+OOPS! There is no task numbered 2. Your list currently has 1 task(s).
 1.[T][ ] borrow book
 ```
