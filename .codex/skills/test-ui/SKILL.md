@@ -35,3 +35,5 @@ python .codex/skills/test-ui/scripts/run_ui_tests.py `
 If `python` is unavailable, use the Codex bundled Python runtime. If Java 25 is installed but is not the active terminal runtime, pass its installation directory with `--java-home`.
 
 Keep `test/ui-test-plan.md` synchronized whenever commands or visible output change. Expected fragments should be specific enough to prove the behavior while excluding decorative separators and the banner unless those are the behavior under test.
+
+For persistence tests, place `<restart>` on its own line in an input block. The plan runner starts a new application process at that point while preserving the case's isolated working directory. End each session with `bye` before restarting.

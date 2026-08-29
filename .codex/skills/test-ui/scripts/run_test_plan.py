@@ -27,6 +27,7 @@ CASE_PATTERN = re.compile(
     r"Expected output:\n\n```text\n(?P<expected>.*?)\n```",
     re.MULTILINE | re.DOTALL,
 )
+RESTART_COMMAND = "<restart>"
 
 
 @dataclass(frozen=True)
@@ -99,16 +100,27 @@ def run_test_case(
     java_executable: str,
     classes_dir: Path,
     main_class: str,
+    working_directory: Path,
 ) -> bool:
     """Execute one case, print its transcript, and report whether it passed."""
     print(f"=== {test_case.name} ===")
     print(f"Aim: {test_case.aim}")
-    return_code, output, error_output = run_application(
-        java_executable,
-        classes_dir,
-        main_class,
-        test_case.commands,
-    )
+    command_sessions = split_command_sessions(test_case.commands)
+    return_code = 0
+    output = ""
+    error_output = ""
+    for commands in command_sessions:
+        return_code, session_output, session_error_output = run_application(
+            java_executable,
+            classes_dir,
+            main_class,
+            commands,
+            working_directory,
+        )
+        output += session_output
+        error_output += session_error_output
+        if return_code != 0:
+            break
     print_transcript(test_case.commands, output, error_output)
 
     if return_code != 0:
@@ -127,6 +139,22 @@ def run_test_case(
     return True
 
 
+def split_command_sessions(commands: list[str]) -> list[list[str]]:
+    """Split commands at restart markers while rejecting empty sessions."""
+    command_sessions: list[list[str]] = [[]]
+    for command in commands:
+        if command == RESTART_COMMAND:
+            if not command_sessions[-1]:
+                raise RuntimeError("A <restart> marker cannot follow an empty session.")
+            command_sessions.append([])
+        else:
+            command_sessions[-1].append(command)
+
+    if not command_sessions[-1]:
+        raise RuntimeError("A test case cannot end with a <restart> marker.")
+    return command_sessions
+
+
 def main() -> int:
     """Compile once and execute the complete UI plan with fail-fast behavior."""
     arguments = parse_arguments()
@@ -138,14 +166,19 @@ def main() -> int:
         require_java_25(java_executable)
 
         with tempfile.TemporaryDirectory(prefix="staniz-ui-suite-") as temporary_directory:
-            classes_dir = Path(temporary_directory)
+            temporary_path = Path(temporary_directory)
+            classes_dir = temporary_path / "classes"
+            classes_dir.mkdir()
             compile_sources(javac_executable, arguments.source_dir, classes_dir)
-            for test_case in test_cases:
+            for case_number, test_case in enumerate(test_cases, start=1):
+                working_directory = temporary_path / f"case-{case_number}"
+                working_directory.mkdir()
                 if not run_test_case(
                     test_case,
                     java_executable,
                     classes_dir,
                     arguments.main_class,
+                    working_directory,
                 ):
                     return 1
     except RuntimeError as error:

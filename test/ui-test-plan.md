@@ -1,10 +1,11 @@
 # Staniz UI Test Plan
 
-Run these cases with the project `test-ui` skill. Expected output entries are ordered fragments; the banner and decorative separators are intentionally omitted.
+Run these cases with the project `test-ui` skill. Expected output entries are
+ordered fragments; the banner and decorative separators are intentionally omitted.
 
 ## Case 1: Create and list all task types
 
-Aim: Confirm that to-dos, deadlines, and events are created and displayed using their respective type markers and scheduling details.
+Aim: Confirm that to-dos, deadlines, and events use their respective type markers and scheduling details.
 
 Input:
 
@@ -240,4 +241,65 @@ OOPS! The task number must be a whole number.
 OOPS! There is no task numbered 0. Your list currently has 1 task(s).
 OOPS! There is no task numbered 2. Your list currently has 1 task(s).
 1.[T][ ] borrow book
+```
+
+## Case 9: Load all task types after restart
+
+Aim: Confirm that task types, order, completion status, and escaped text survive an application restart.
+
+Input:
+
+```text
+todo read C:\docs | notes
+deadline return book /by Sunday
+event project meeting /from Mon 2pm /to 4pm
+mark 2
+bye
+<restart>
+list
+bye
+```
+
+Expected output:
+
+```text
+added: [T][ ] read C:\docs | notes
+added: [D][ ] return book (by: Sunday)
+added: [E][ ] project meeting (from: Mon 2pm to: 4pm)
+  [D][X] return book (by: Sunday)
+1.[T][ ] read C:\docs | notes
+2.[D][X] return book (by: Sunday)
+3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+```
+
+## Case 10: Persist unmark and delete operations
+
+Aim: Confirm that status reversals and deletions remain applied across multiple application restarts.
+
+Input:
+
+```text
+todo borrow book
+deadline return book /by Sunday
+event project meeting /from Mon 2pm /to 4pm
+mark 2
+bye
+<restart>
+unmark 2
+delete 1
+bye
+<restart>
+list
+bye
+```
+
+Expected output:
+
+```text
+  [D][X] return book (by: Sunday)
+  [D][ ] return book (by: Sunday)
+  [T][ ] borrow book
+Now you have 2 tasks in the list.
+1.[D][ ] return book (by: Sunday)
+2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
 ```

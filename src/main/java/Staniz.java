@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -33,18 +32,25 @@ public class Staniz {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
-        List<Task> tasks = new ArrayList<>();
-
         printResponse(BANNER + System.lineSeparator() + GREETING);
+
+        Storage storage = new Storage();
+        List<Task> tasks;
+        try {
+            tasks = storage.load();
+        } catch (StorageException exception) {
+            printResponse("OOPS! " + exception.getMessage());
+            return;
+        }
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
                 try {
-                    if (processCommand(input, tasks)) {
+                    if (processCommand(input, tasks, storage)) {
                         break;
                     }
-                } catch (StanizException exception) {
+                } catch (StanizException | StorageException exception) {
                     printResponse(exception.getMessage());
                 }
             }
@@ -58,10 +64,13 @@ public class Staniz {
      *
      * @param input command entered by the user
      * @param tasks tasks that the command can read or update
+     * @param storage persistence destination for task changes
      * @return true only when the exit command is entered
      * @throws StanizException if the command is invalid
+     * @throws StorageException if changed tasks cannot be saved
      */
-    private static boolean processCommand(String input, List<Task> tasks) throws StanizException {
+    private static boolean processCommand(String input, List<Task> tasks, Storage storage)
+            throws StanizException, StorageException {
         if (input.isBlank()) {
             throw new StanizException(EMPTY_INPUT_MESSAGE);
         }
@@ -90,6 +99,9 @@ public class Staniz {
         case EVENT:
             addEvent(input, tasks);
             break;
+        }
+        if (commandType.changesTasks()) {
+            storage.save(tasks);
         }
         return false;
     }

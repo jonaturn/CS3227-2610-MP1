@@ -16,6 +16,16 @@ public class Deadline extends Task {
     }
 
     /**
+     * Returns this deadline in the persistent storage format.
+     *
+     * @return serialized deadline data
+     */
+    @Override
+    public String toDataString() {
+        return getDataPrefix("D") + DATA_SEPARATOR + encodeDataField(by);
+    }
+
+    /**
      * Returns the deadline formatted with its task type and due time.
      *
      * @return type, completion status, description, and due time

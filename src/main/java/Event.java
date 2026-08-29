@@ -19,6 +19,17 @@ public class Event extends Task {
     }
 
     /**
+     * Returns this event in the persistent storage format.
+     *
+     * @return serialized event data
+     */
+    @Override
+    public String toDataString() {
+        return getDataPrefix("E") + DATA_SEPARATOR + encodeDataField(from)
+                + DATA_SEPARATOR + encodeDataField(to);
+    }
+
+    /**
      * Returns the event formatted with its task type and time range.
      *
      * @return type, completion status, description, and time range

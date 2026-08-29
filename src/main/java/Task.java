@@ -1,9 +1,12 @@
 /**
  * Represents a task with a description and completion status.
  */
-public class Task {
+public abstract class Task {
     private static final String DONE_ICON = "X";
     private static final String NOT_DONE_ICON = " ";
+
+    /** Separator used between fields in the persistent task format. */
+    protected static final String DATA_SEPARATOR = " | ";
 
     private final String description;
     private boolean isDone;
@@ -40,6 +43,34 @@ public class Task {
     public String getStatusIcon() {
         return isDone ? DONE_ICON : NOT_DONE_ICON;
     }
+
+    /**
+     * Returns the common type, status, and description fields for persistence.
+     *
+     * @param taskType single-character task type identifier
+     * @return serialized common task fields
+     */
+    protected String getDataPrefix(String taskType) {
+        String completionValue = isDone ? "1" : "0";
+        return taskType + DATA_SEPARATOR + completionValue + DATA_SEPARATOR + encodeDataField(description);
+    }
+
+    /**
+     * Escapes field separator and escape characters in a persisted text value.
+     *
+     * @param value task value to encode
+     * @return value safe for the persistent task format
+     */
+    protected String encodeDataField(String value) {
+        return value.replace("\\", "\\\\").replace("|", "\\|");
+    }
+
+    /**
+     * Returns this task in the persistent storage format.
+     *
+     * @return serialized task data
+     */
+    public abstract String toDataString();
 
     /**
      * Returns the task formatted for display.

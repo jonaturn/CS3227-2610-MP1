@@ -101,6 +101,7 @@ def run_application(
     classes_dir: Path,
     main_class: str,
     commands: list[str],
+    working_directory: Path | None = None,
 ) -> tuple[int, str, str]:
     """Run the application with the supplied commands and capture its output."""
     command_input = "\n".join(commands) + "\n"
@@ -110,6 +111,7 @@ def run_application(
         capture_output=True,
         text=True,
         check=False,
+        cwd=working_directory,
     )
     return result.returncode, result.stdout.replace("\r\n", "\n"), result.stderr.replace("\r\n", "\n")
 
@@ -147,13 +149,18 @@ def main() -> int:
         require_java_25(java_executable)
 
         with tempfile.TemporaryDirectory(prefix="staniz-ui-test-") as temporary_directory:
-            classes_dir = Path(temporary_directory)
+            temporary_path = Path(temporary_directory)
+            classes_dir = temporary_path / "classes"
+            working_directory = temporary_path / "work"
+            classes_dir.mkdir()
+            working_directory.mkdir()
             compile_sources(javac_executable, arguments.source_dir, classes_dir)
             return_code, output, error_output = run_application(
                 java_executable,
                 classes_dir,
                 arguments.main_class,
                 arguments.commands,
+                working_directory,
             )
     except RuntimeError as error:
         print(f"FAIL [{arguments.case}]", file=sys.stderr)
