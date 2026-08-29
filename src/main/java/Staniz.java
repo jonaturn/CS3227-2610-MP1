@@ -7,11 +7,17 @@ import java.util.Scanner;
  */
 public class Staniz {
     private static final String ADDED_MESSAGE_PREFIX = "added: ";
+    private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
+    private static final String DEADLINE_SEPARATOR = " /by ";
     private static final String EMPTY_INPUT_MESSAGE = "Please enter a command.";
+    private static final String EVENT_COMMAND_PREFIX = "event ";
+    private static final String EVENT_FROM_SEPARATOR = " /from ";
+    private static final String EVENT_TO_SEPARATOR = " /to ";
     private static final String EXIT_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND_PREFIX = "mark ";
     private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
+    private static final String TODO_COMMAND_PREFIX = "todo ";
     private static final String UNMARK_COMMAND_PREFIX = "unmark ";
     private static final String UNMARKED_MESSAGE = "OK, I've marked this task as not done yet:";
     private static final String SEPARATOR = "____________________________________________________________";
@@ -53,14 +59,68 @@ public class Staniz {
                     markTaskAsDone(input, tasks);
                 } else if (input.startsWith(UNMARK_COMMAND_PREFIX)) {
                     markTaskAsNotDone(input, tasks);
-                } else {
-                    tasks.add(new Task(input));
-                    printResponse(ADDED_MESSAGE_PREFIX + input);
+                } else if (input.startsWith(TODO_COMMAND_PREFIX)) {
+                    addTodo(input, tasks);
+                } else if (input.startsWith(DEADLINE_COMMAND_PREFIX)) {
+                    addDeadline(input, tasks);
+                } else if (input.startsWith(EVENT_COMMAND_PREFIX)) {
+                    addEvent(input, tasks);
                 }
             }
         }
 
         printResponse(FAREWELL);
+    }
+
+    /**
+     * Creates and stores a to-do from its command.
+     *
+     * @param input command containing the task description
+     * @param tasks list that receives the new task
+     */
+    private static void addTodo(String input, List<Task> tasks) {
+        String description = input.substring(TODO_COMMAND_PREFIX.length());
+        addTask(new Todo(description), tasks);
+    }
+
+    /**
+     * Creates and stores a deadline from its command.
+     *
+     * @param input command containing the description and deadline
+     * @param tasks list that receives the new task
+     */
+    private static void addDeadline(String input, List<Task> tasks) {
+        int separatorIndex = input.indexOf(DEADLINE_SEPARATOR);
+        String description = input.substring(DEADLINE_COMMAND_PREFIX.length(), separatorIndex);
+        String by = input.substring(separatorIndex + DEADLINE_SEPARATOR.length());
+        addTask(new Deadline(description, by), tasks);
+    }
+
+    /**
+     * Creates and stores an event from its command.
+     *
+     * @param input command containing the description, start, and end
+     * @param tasks list that receives the new task
+     */
+    private static void addEvent(String input, List<Task> tasks) {
+        int fromSeparatorIndex = input.indexOf(EVENT_FROM_SEPARATOR);
+        int toSeparatorIndex = input.indexOf(EVENT_TO_SEPARATOR, fromSeparatorIndex
+                + EVENT_FROM_SEPARATOR.length());
+        String description = input.substring(EVENT_COMMAND_PREFIX.length(), fromSeparatorIndex);
+        String from = input.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex);
+        String to = input.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length());
+        addTask(new Event(description, from, to), tasks);
+    }
+
+    /**
+     * Stores a task and confirms its formatted representation to the user.
+     *
+     * @param task task to store
+     * @param tasks list that receives the task
+     */
+    private static void addTask(Task task, List<Task> tasks) {
+        tasks.add(task);
+        printResponse(ADDED_MESSAGE_PREFIX + task);
     }
 
     /**
