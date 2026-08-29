@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,6 +11,7 @@ public class Staniz {
     private static final String DEADLINE_SEPARATOR = " /by";
     private static final String DELETED_MESSAGE = "Noted. I've removed this task:";
     private static final String EMPTY_INPUT_MESSAGE = "OOPS! Please enter a command.";
+    private static final String EXAMPLE_DATE = "2019-12-02";
     private static final String EVENT_FROM_SEPARATOR = " /from";
     private static final String EVENT_TO_SEPARATOR = " /to";
     private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
@@ -147,16 +150,17 @@ public class Staniz {
         int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
         if (separatorIndex < 0) {
             throw new StanizException("OOPS! A deadline needs '/by'. "
-                    + "Try: deadline return book /by Sunday");
+                    + "Try: deadline return book /by " + EXAMPLE_DATE);
         }
         String description = arguments.substring(0, separatorIndex);
-        String by = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length()).strip();
+        String byText = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length()).strip();
         if (description.isBlank()) {
             throw new StanizException("OOPS! A deadline needs a description before '/by'.");
         }
-        if (by.isBlank()) {
+        if (byText.isBlank()) {
             throw new StanizException("OOPS! A deadline needs a due time after '/by'.");
         }
+        LocalDate by = parseDate(byText, "deadline date");
         addTask(new Deadline(description, by), tasks);
     }
 
@@ -171,28 +175,50 @@ public class Staniz {
         int fromSeparatorIndex = arguments.indexOf(EVENT_FROM_SEPARATOR);
         if (fromSeparatorIndex < 0) {
             throw new StanizException("OOPS! An event needs '/from' and '/to'. "
-                    + "Try: event meeting /from Mon 2pm /to 4pm");
+                    + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
         int toSeparatorIndex = arguments.indexOf(EVENT_TO_SEPARATOR, fromSeparatorIndex
                 + EVENT_FROM_SEPARATOR.length());
         if (toSeparatorIndex < 0) {
             throw new StanizException("OOPS! An event needs an end time after '/to'. "
-                    + "Try: event meeting /from Mon 2pm /to 4pm");
+                    + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
         String description = arguments.substring(0, fromSeparatorIndex);
-        String from = arguments.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex)
+        String fromText = arguments.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex)
                 .strip();
-        String to = arguments.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length()).strip();
+        String toText = arguments.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length()).strip();
         if (description.isBlank()) {
             throw new StanizException("OOPS! An event needs a description before '/from'.");
         }
-        if (from.isBlank()) {
+        if (fromText.isBlank()) {
             throw new StanizException("OOPS! An event needs a start time after '/from'.");
         }
-        if (to.isBlank()) {
+        if (toText.isBlank()) {
             throw new StanizException("OOPS! An event needs an end time after '/to'.");
         }
+        LocalDate from = parseDate(fromText, "event start date");
+        LocalDate to = parseDate(toText, "event end date");
+        if (from.isAfter(to)) {
+            throw new StanizException("OOPS! The event start date cannot be after the end date.");
+        }
         addTask(new Event(description, from, to), tasks);
+    }
+
+    /**
+     * Parses a command date and translates parser failures into user-facing guidance.
+     *
+     * @param dateText date text supplied by the user
+     * @param fieldName field name used in the error message
+     * @return parsed calendar date
+     * @throws StanizException if the date is not a valid ISO calendar date
+     */
+    private static LocalDate parseDate(String dateText, String fieldName) throws StanizException {
+        try {
+            return DateParser.parse(dateText);
+        } catch (DateTimeParseException exception) {
+            throw new StanizException("OOPS! The " + fieldName
+                    + " must use yyyy-MM-dd, e.g. " + EXAMPLE_DATE + ".");
+        }
     }
 
     /**

@@ -11,8 +11,8 @@ Input:
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02
+event project meeting /from 2019-12-02 /to 2019-12-03
 list
 bye
 ```
@@ -21,11 +21,11 @@ Expected output:
 
 ```text
 added: [T][ ] borrow book
-added: [D][ ] return book (by: Sunday)
-added: [E][ ] project meeting (from: Mon 2pm to: 4pm)
+added: [D][ ] return book (by: Dec 02 2019)
+added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[T][ ] borrow book
-2.[D][ ] return book (by: Sunday)
-3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+2.[D][ ] return book (by: Dec 02 2019)
+3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 Bye. Hope to see you again soon!
 ```
 
@@ -37,8 +37,8 @@ Input:
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02
+event project meeting /from 2019-12-02 /to 2019-12-03
 mark 1
 mark 2
 mark 3
@@ -52,12 +52,12 @@ Expected output:
 Nice! I've marked this task as done:
   [T][X] borrow book
 Nice! I've marked this task as done:
-  [D][X] return book (by: Sunday)
+  [D][X] return book (by: Dec 02 2019)
 Nice! I've marked this task as done:
-  [E][X] project meeting (from: Mon 2pm to: 4pm)
+  [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[T][X] borrow book
-2.[D][X] return book (by: Sunday)
-3.[E][X] project meeting (from: Mon 2pm to: 4pm)
+2.[D][X] return book (by: Dec 02 2019)
+3.[E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
 
 ## Case 3: Unmark a scheduled task
@@ -67,7 +67,7 @@ Aim: Confirm that an inherited status can be reversed while an event retains its
 Input:
 
 ```text
-event project meeting /from Mon 2pm /to 4pm
+event project meeting /from 2019-12-02 /to 2019-12-03
 mark 1
 unmark 1
 list
@@ -77,10 +77,10 @@ bye
 Expected output:
 
 ```text
-  [E][X] project meeting (from: Mon 2pm to: 4pm)
+  [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 OK, I've marked this task as not done yet:
-  [E][ ] project meeting (from: Mon 2pm to: 4pm)
-1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+1.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
 
 ## Case 4: Recover from blank and unknown commands
@@ -116,15 +116,15 @@ Input:
 
 ```text
 deadline return book
-deadline  /by Sunday
+deadline  /by 2019-12-02
 deadline return book /by
-deadline return book /by Sunday
+deadline return book /by 2019-12-02
 event project meeting
-event project meeting /from Mon 2pm
-event  /from Mon 2pm /to 4pm
-event project meeting /from /to 4pm
-event project meeting /from Mon 2pm /to
-event project meeting /from Mon 2pm /to 4pm
+event project meeting /from 2019-12-02
+event  /from 2019-12-02 /to 2019-12-03
+event project meeting /from /to 2019-12-03
+event project meeting /from 2019-12-02 /to
+event project meeting /from 2019-12-02 /to 2019-12-03
 list
 bye
 ```
@@ -132,18 +132,18 @@ bye
 Expected output:
 
 ```text
-OOPS! A deadline needs '/by'. Try: deadline return book /by Sunday
+OOPS! A deadline needs '/by'. Try: deadline return book /by 2019-12-02
 OOPS! A deadline needs a description before '/by'.
 OOPS! A deadline needs a due time after '/by'.
-added: [D][ ] return book (by: Sunday)
-OOPS! An event needs '/from' and '/to'. Try: event meeting /from Mon 2pm /to 4pm
-OOPS! An event needs an end time after '/to'. Try: event meeting /from Mon 2pm /to 4pm
+added: [D][ ] return book (by: Dec 02 2019)
+OOPS! An event needs '/from' and '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
+OOPS! An event needs an end time after '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
 OOPS! An event needs a description before '/from'.
 OOPS! An event needs a start time after '/from'.
 OOPS! An event needs an end time after '/to'.
-added: [E][ ] project meeting (from: Mon 2pm to: 4pm)
-1.[D][ ] return book (by: Sunday)
-2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+1.[D][ ] return book (by: Dec 02 2019)
+2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
 
 ## Case 6: Validate status command task numbers
@@ -189,8 +189,8 @@ Input:
 
 ```text
 todo first task
-deadline middle task /by Sunday
-event last task /from Mon 2pm /to 4pm
+deadline middle task /by 2019-12-02
+event last task /from 2019-12-02 /to 2019-12-03
 delete 2
 list
 delete 2
@@ -203,12 +203,12 @@ Expected output:
 
 ```text
 Noted. I've removed this task:
-  [D][ ] middle task (by: Sunday)
+  [D][ ] middle task (by: Dec 02 2019)
 Now you have 2 tasks in the list.
 1.[T][ ] first task
-2.[E][ ] last task (from: Mon 2pm to: 4pm)
+2.[E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
 Noted. I've removed this task:
-  [E][ ] last task (from: Mon 2pm to: 4pm)
+  [E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
 Now you have 1 task in the list.
 Noted. I've removed this task:
   [T][ ] first task
@@ -251,8 +251,8 @@ Input:
 
 ```text
 todo read C:\docs | notes
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02
+event project meeting /from 2019-12-02 /to 2019-12-03
 mark 2
 bye
 <restart>
@@ -264,12 +264,12 @@ Expected output:
 
 ```text
 added: [T][ ] read C:\docs | notes
-added: [D][ ] return book (by: Sunday)
-added: [E][ ] project meeting (from: Mon 2pm to: 4pm)
-  [D][X] return book (by: Sunday)
+added: [D][ ] return book (by: Dec 02 2019)
+added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+  [D][X] return book (by: Dec 02 2019)
 1.[T][ ] read C:\docs | notes
-2.[D][X] return book (by: Sunday)
-3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+2.[D][X] return book (by: Dec 02 2019)
+3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
 
 ## Case 10: Persist unmark and delete operations
@@ -280,8 +280,8 @@ Input:
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02
+event project meeting /from 2019-12-02 /to 2019-12-03
 mark 2
 bye
 <restart>
@@ -296,10 +296,42 @@ bye
 Expected output:
 
 ```text
-  [D][X] return book (by: Sunday)
-  [D][ ] return book (by: Sunday)
+  [D][X] return book (by: Dec 02 2019)
+  [D][ ] return book (by: Dec 02 2019)
   [T][ ] borrow book
 Now you have 2 tasks in the list.
-1.[D][ ] return book (by: Sunday)
-2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+1.[D][ ] return book (by: Dec 02 2019)
+2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+```
+
+## Case 11: Validate calendar dates and event order
+
+Aim: Confirm that valid dates are accepted while malformed, impossible, and reversed dates are rejected safely.
+
+Input:
+
+```text
+deadline leap day /by 2024-02-29
+deadline wrong format /by 29-02-2024
+deadline impossible date /by 2023-02-29
+event invalid start /from 03-01-2024 /to 2024-03-02
+event invalid end /from 2024-03-01 /to 03-02-2024
+event reversed /from 2024-03-02 /to 2024-03-01
+event same day /from 2024-03-01 /to 2024-03-01
+list
+bye
+```
+
+Expected output:
+
+```text
+added: [D][ ] leap day (by: Feb 29 2024)
+OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
+OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
+OOPS! The event start date must use yyyy-MM-dd, e.g. 2019-12-02.
+OOPS! The event end date must use yyyy-MM-dd, e.g. 2019-12-02.
+OOPS! The event start date cannot be after the end date.
+added: [E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
+1.[D][ ] leap day (by: Feb 29 2024)
+2.[E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
 ```

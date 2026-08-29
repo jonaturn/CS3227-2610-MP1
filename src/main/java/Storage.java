@@ -3,6 +3,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,14 +105,19 @@ public class Storage {
             requireFieldCount(fields, 4, lineNumber);
             task = new Deadline(
                     requireValue(fields.get(2), "description", lineNumber),
-                    requireValue(fields.get(3), "deadline", lineNumber));
+                    parseDate(fields.get(3), "deadline date", lineNumber));
             break;
         case "E":
             requireFieldCount(fields, 5, lineNumber);
+            LocalDate from = parseDate(fields.get(3), "event start date", lineNumber);
+            LocalDate to = parseDate(fields.get(4), "event end date", lineNumber);
+            if (from.isAfter(to)) {
+                throw invalidData(lineNumber, "event start date cannot be after the end date");
+            }
             task = new Event(
                     requireValue(fields.get(2), "description", lineNumber),
-                    requireValue(fields.get(3), "start time", lineNumber),
-                    requireValue(fields.get(4), "end time", lineNumber));
+                    from,
+                    to);
             break;
         default:
             throw invalidData(lineNumber, "unknown task type '" + taskType + "'");
@@ -176,6 +183,24 @@ public class Storage {
             return false;
         }
         throw invalidData(lineNumber, "completion status must be 0 or 1");
+    }
+
+    /**
+     * Parses a required ISO date from persistent data.
+     *
+     * @param value persisted date text
+     * @param fieldName field name used in errors
+     * @param lineNumber one-based line number used in errors
+     * @return parsed calendar date
+     * @throws StorageException if the value is blank or is not a valid ISO date
+     */
+    private LocalDate parseDate(String value, String fieldName, int lineNumber) throws StorageException {
+        String requiredValue = requireValue(value, fieldName, lineNumber);
+        try {
+            return DateParser.parse(requiredValue);
+        } catch (DateTimeParseException exception) {
+            throw invalidData(lineNumber, fieldName + " must use yyyy-MM-dd");
+        }
     }
 
     /**
