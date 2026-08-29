@@ -26,6 +26,13 @@ public class Task {
     }
 
     /**
+     * Marks this task as not completed.
+     */
+    public void markAsNotDone() {
+        isDone = false;
+    }
+
+    /**
      * Returns the symbol representing the task's completion status.
      *
      * @return X if completed, or a blank space otherwise

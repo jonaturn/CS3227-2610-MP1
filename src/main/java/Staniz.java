@@ -12,6 +12,8 @@ public class Staniz {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND_PREFIX = "mark ";
     private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
+    private static final String UNMARK_COMMAND_PREFIX = "unmark ";
+    private static final String UNMARKED_MESSAGE = "OK, I've marked this task as not done yet:";
     private static final String SEPARATOR = "____________________________________________________________";
     private static final String TASK_LIST_HEADER = "Here are the tasks in your list:";
     private static final String BANNER = " ____ _____  _    _   _ ___ _____\n"
@@ -49,6 +51,8 @@ public class Staniz {
                     printTasks(tasks);
                 } else if (input.startsWith(MARK_COMMAND_PREFIX)) {
                     markTaskAsDone(input, tasks);
+                } else if (input.startsWith(UNMARK_COMMAND_PREFIX)) {
+                    markTaskAsNotDone(input, tasks);
                 } else {
                     tasks.add(new Task(input));
                     printResponse(ADDED_MESSAGE_PREFIX + input);
@@ -71,6 +75,20 @@ public class Staniz {
         task.markAsDone();
 
         printResponse(MARKED_MESSAGE + System.lineSeparator() + "  " + task);
+    }
+
+    /**
+     * Marks the task identified by a one-based number as not done.
+     *
+     * @param input command containing the task number
+     * @param tasks tasks that can be updated
+     */
+    private static void markTaskAsNotDone(String input, List<Task> tasks) {
+        int taskIndex = Integer.parseInt(input.substring(UNMARK_COMMAND_PREFIX.length())) - 1;
+        Task task = tasks.get(taskIndex);
+        task.markAsNotDone();
+
+        printResponse(UNMARKED_MESSAGE + System.lineSeparator() + "  " + task);
     }
 
     /**
