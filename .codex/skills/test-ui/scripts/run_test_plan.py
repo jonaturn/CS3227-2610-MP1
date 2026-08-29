@@ -153,7 +153,7 @@ def main() -> int:
         print(error, file=sys.stderr)
         return 1
 
-    print(f"PASS [Level 4 UI suite: {len(test_cases)}/{len(test_cases)} cases]")
+    print(f"PASS [UI test suite: {len(test_cases)}/{len(test_cases)} cases]")
     return 0
 
 

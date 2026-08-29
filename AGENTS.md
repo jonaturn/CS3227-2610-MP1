@@ -30,7 +30,7 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 
 ## UI testing
 
-Keep `test/ui-test-plan.md` synchronized with user-visible command or output changes. After each code update that affects the command-line UI, invoke the project `test-ui` skill, run every applicable case, and show the console input/output record. Stop at the first failure and report the expected and actual behavior.
+Keep `test/ui-test-plan.md` synchronized with user-visible command or output changes. Interleave positive and negative cases so tests verify that rejected commands do not corrupt application state. After each code update that affects the command-line UI, invoke the project `test-ui` skill, run every applicable case, and show the console input/output record. Stop at the first failure and report the expected and actual behavior.
 
 ## Git
 

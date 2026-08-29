@@ -7,18 +7,25 @@ import java.util.Scanner;
  */
 public class Staniz {
     private static final String ADDED_MESSAGE_PREFIX = "added: ";
-    private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
-    private static final String DEADLINE_SEPARATOR = " /by ";
-    private static final String EMPTY_INPUT_MESSAGE = "Please enter a command.";
-    private static final String EVENT_COMMAND_PREFIX = "event ";
-    private static final String EVENT_FROM_SEPARATOR = " /from ";
-    private static final String EVENT_TO_SEPARATOR = " /to ";
+    private static final String DEADLINE_COMMAND = "deadline";
+    private static final String DEADLINE_COMMAND_PREFIX = DEADLINE_COMMAND + " ";
+    private static final String DEADLINE_SEPARATOR = " /by";
+    private static final String EMPTY_INPUT_MESSAGE = "OOPS! Please enter a command.";
+    private static final String EVENT_COMMAND = "event";
+    private static final String EVENT_COMMAND_PREFIX = EVENT_COMMAND + " ";
+    private static final String EVENT_FROM_SEPARATOR = " /from";
+    private static final String EVENT_TO_SEPARATOR = " /to";
     private static final String EXIT_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
-    private static final String MARK_COMMAND_PREFIX = "mark ";
+    private static final String MARK_COMMAND = "mark";
+    private static final String MARK_COMMAND_PREFIX = MARK_COMMAND + " ";
     private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
-    private static final String TODO_COMMAND_PREFIX = "todo ";
-    private static final String UNMARK_COMMAND_PREFIX = "unmark ";
+    private static final String TODO_COMMAND = "todo";
+    private static final String TODO_COMMAND_PREFIX = TODO_COMMAND + " ";
+    private static final String UNKNOWN_COMMAND_MESSAGE = "OOPS! I don't recognize that command. "
+            + "Try todo, deadline, event, list, mark, unmark, or bye.";
+    private static final String UNMARK_COMMAND = "unmark";
+    private static final String UNMARK_COMMAND_PREFIX = UNMARK_COMMAND + " ";
     private static final String UNMARKED_MESSAGE = "OK, I've marked this task as not done yet:";
     private static final String SEPARATOR = "____________________________________________________________";
     private static final String TASK_LIST_HEADER = "Here are the tasks in your list:";
@@ -44,27 +51,12 @@ public class Staniz {
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
-                if (input.isBlank()) {
-                    printResponse(EMPTY_INPUT_MESSAGE);
-                    continue;
-                }
-
-                if (EXIT_COMMAND.equals(input)) {
-                    break;
-                }
-
-                if (LIST_COMMAND.equals(input)) {
-                    printTasks(tasks);
-                } else if (input.startsWith(MARK_COMMAND_PREFIX)) {
-                    markTaskAsDone(input, tasks);
-                } else if (input.startsWith(UNMARK_COMMAND_PREFIX)) {
-                    markTaskAsNotDone(input, tasks);
-                } else if (input.startsWith(TODO_COMMAND_PREFIX)) {
-                    addTodo(input, tasks);
-                } else if (input.startsWith(DEADLINE_COMMAND_PREFIX)) {
-                    addDeadline(input, tasks);
-                } else if (input.startsWith(EVENT_COMMAND_PREFIX)) {
-                    addEvent(input, tasks);
+                try {
+                    if (processCommand(input, tasks)) {
+                        break;
+                    }
+                } catch (StanizException exception) {
+                    printResponse(exception.getMessage());
                 }
             }
         }
@@ -73,13 +65,60 @@ public class Staniz {
     }
 
     /**
+     * Processes one command and reports whether the application should exit.
+     *
+     * @param input command entered by the user
+     * @param tasks tasks that the command can read or update
+     * @return true only when the exit command is entered
+     * @throws StanizException if the command is invalid
+     */
+    private static boolean processCommand(String input, List<Task> tasks) throws StanizException {
+        if (input.isBlank()) {
+            throw new StanizException(EMPTY_INPUT_MESSAGE);
+        }
+        if (EXIT_COMMAND.equals(input)) {
+            return true;
+        }
+        if (LIST_COMMAND.equals(input)) {
+            printTasks(tasks);
+        } else if (isCommand(input, MARK_COMMAND)) {
+            markTaskAsDone(input, tasks);
+        } else if (isCommand(input, UNMARK_COMMAND)) {
+            markTaskAsNotDone(input, tasks);
+        } else if (isCommand(input, TODO_COMMAND)) {
+            addTodo(input, tasks);
+        } else if (isCommand(input, DEADLINE_COMMAND)) {
+            addDeadline(input, tasks);
+        } else if (isCommand(input, EVENT_COMMAND)) {
+            addEvent(input, tasks);
+        } else {
+            throw new StanizException(UNKNOWN_COMMAND_MESSAGE);
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether input is a command with either no argument or a space-separated argument.
+     *
+     * @param input complete user input
+     * @param command command word to match
+     * @return true if the input invokes the command
+     */
+    private static boolean isCommand(String input, String command) {
+        return command.equals(input) || input.startsWith(command + " ");
+    }
+
+    /**
      * Creates and stores a to-do from its command.
      *
      * @param input command containing the task description
      * @param tasks list that receives the new task
      */
-    private static void addTodo(String input, List<Task> tasks) {
-        String description = input.substring(TODO_COMMAND_PREFIX.length());
+    private static void addTodo(String input, List<Task> tasks) throws StanizException {
+        String description = getCommandArgument(input, TODO_COMMAND_PREFIX);
+        if (description.isBlank()) {
+            throw new StanizException("OOPS! A todo needs a description. Try: todo borrow book");
+        }
         addTask(new Todo(description), tasks);
     }
 
@@ -89,10 +128,20 @@ public class Staniz {
      * @param input command containing the description and deadline
      * @param tasks list that receives the new task
      */
-    private static void addDeadline(String input, List<Task> tasks) {
+    private static void addDeadline(String input, List<Task> tasks) throws StanizException {
         int separatorIndex = input.indexOf(DEADLINE_SEPARATOR);
+        if (separatorIndex < 0) {
+            throw new StanizException("OOPS! A deadline needs '/by'. "
+                    + "Try: deadline return book /by Sunday");
+        }
         String description = input.substring(DEADLINE_COMMAND_PREFIX.length(), separatorIndex);
-        String by = input.substring(separatorIndex + DEADLINE_SEPARATOR.length());
+        String by = input.substring(separatorIndex + DEADLINE_SEPARATOR.length()).strip();
+        if (description.isBlank()) {
+            throw new StanizException("OOPS! A deadline needs a description before '/by'.");
+        }
+        if (by.isBlank()) {
+            throw new StanizException("OOPS! A deadline needs a due time after '/by'.");
+        }
         addTask(new Deadline(description, by), tasks);
     }
 
@@ -102,14 +151,42 @@ public class Staniz {
      * @param input command containing the description, start, and end
      * @param tasks list that receives the new task
      */
-    private static void addEvent(String input, List<Task> tasks) {
+    private static void addEvent(String input, List<Task> tasks) throws StanizException {
         int fromSeparatorIndex = input.indexOf(EVENT_FROM_SEPARATOR);
+        if (fromSeparatorIndex < 0) {
+            throw new StanizException("OOPS! An event needs '/from' and '/to'. "
+                    + "Try: event meeting /from Mon 2pm /to 4pm");
+        }
         int toSeparatorIndex = input.indexOf(EVENT_TO_SEPARATOR, fromSeparatorIndex
                 + EVENT_FROM_SEPARATOR.length());
+        if (toSeparatorIndex < 0) {
+            throw new StanizException("OOPS! An event needs an end time after '/to'. "
+                    + "Try: event meeting /from Mon 2pm /to 4pm");
+        }
         String description = input.substring(EVENT_COMMAND_PREFIX.length(), fromSeparatorIndex);
-        String from = input.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex);
-        String to = input.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length());
+        String from = input.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex).strip();
+        String to = input.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length()).strip();
+        if (description.isBlank()) {
+            throw new StanizException("OOPS! An event needs a description before '/from'.");
+        }
+        if (from.isBlank()) {
+            throw new StanizException("OOPS! An event needs a start time after '/from'.");
+        }
+        if (to.isBlank()) {
+            throw new StanizException("OOPS! An event needs an end time after '/to'.");
+        }
         addTask(new Event(description, from, to), tasks);
+    }
+
+    /**
+     * Extracts the argument portion of a command, returning an empty string when absent.
+     *
+     * @param input complete user input
+     * @param commandPrefix command word followed by one space
+     * @return command argument or an empty string
+     */
+    private static String getCommandArgument(String input, String commandPrefix) {
+        return input.length() < commandPrefix.length() ? "" : input.substring(commandPrefix.length());
     }
 
     /**
@@ -129,8 +206,8 @@ public class Staniz {
      * @param input command containing the task number
      * @param tasks tasks that can be updated
      */
-    private static void markTaskAsDone(String input, List<Task> tasks) {
-        int taskIndex = Integer.parseInt(input.substring(MARK_COMMAND_PREFIX.length())) - 1;
+    private static void markTaskAsDone(String input, List<Task> tasks) throws StanizException {
+        int taskIndex = getTaskIndex(input, MARK_COMMAND_PREFIX, MARK_COMMAND, tasks.size());
         Task task = tasks.get(taskIndex);
         task.markAsDone();
 
@@ -143,12 +220,43 @@ public class Staniz {
      * @param input command containing the task number
      * @param tasks tasks that can be updated
      */
-    private static void markTaskAsNotDone(String input, List<Task> tasks) {
-        int taskIndex = Integer.parseInt(input.substring(UNMARK_COMMAND_PREFIX.length())) - 1;
+    private static void markTaskAsNotDone(String input, List<Task> tasks) throws StanizException {
+        int taskIndex = getTaskIndex(input, UNMARK_COMMAND_PREFIX, UNMARK_COMMAND, tasks.size());
         Task task = tasks.get(taskIndex);
         task.markAsNotDone();
 
         printResponse(UNMARKED_MESSAGE + System.lineSeparator() + "  " + task);
+    }
+
+    /**
+     * Parses and validates the one-based task number supplied to a status command.
+     *
+     * @param input complete user input
+     * @param commandPrefix command word followed by one space
+     * @param command command name used in error guidance
+     * @param taskCount number of tasks currently stored
+     * @return validated zero-based task index
+     * @throws StanizException if the task number is absent, malformed, or out of range
+     */
+    private static int getTaskIndex(String input, String commandPrefix, String command, int taskCount)
+            throws StanizException {
+        String taskNumberText = getCommandArgument(input, commandPrefix);
+        if (taskNumberText.isBlank()) {
+            throw new StanizException("OOPS! '" + command + "' needs a task number. Try: " + command + " 1");
+        }
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException exception) {
+            throw new StanizException("OOPS! The task number must be a whole number.");
+        }
+
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            throw new StanizException("OOPS! There is no task numbered " + taskNumber
+                    + ". Your list currently has " + taskCount + " task(s).");
+        }
+        return taskNumber - 1;
     }
 
     /**
