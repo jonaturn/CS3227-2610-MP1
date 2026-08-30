@@ -36,7 +36,7 @@ public class Ui implements AutoCloseable {
     /**
      * Reports whether another command is available from the user.
      *
-     * @return true when another complete input line can be read
+     * @return true when another complete input line can be read.
      */
     public boolean hasNextCommand() {
         return scanner.hasNextLine();
@@ -45,7 +45,7 @@ public class Ui implements AutoCloseable {
     /**
      * Reads the next command entered by the user.
      *
-     * @return complete command line
+     * @return complete command line.
      */
     public String readCommand() {
         return scanner.nextLine();
@@ -68,7 +68,7 @@ public class Ui implements AutoCloseable {
     /**
      * Confirms that a task was added.
      *
-     * @param task task that was added
+     * @param task task that was added.
      */
     public void showTaskAdded(Task task) {
         showResponse(ADDED_MESSAGE_PREFIX + task);
@@ -77,7 +77,7 @@ public class Ui implements AutoCloseable {
     /**
      * Confirms that a task was marked as completed.
      *
-     * @param task task whose status changed
+     * @param task task whose status changed.
      */
     public void showTaskMarked(Task task) {
         showResponse(MARKED_MESSAGE + System.lineSeparator() + "  " + task);
@@ -86,7 +86,7 @@ public class Ui implements AutoCloseable {
     /**
      * Confirms that a task was marked as incomplete.
      *
-     * @param task task whose status changed
+     * @param task task whose status changed.
      */
     public void showTaskUnmarked(Task task) {
         showResponse(UNMARKED_MESSAGE + System.lineSeparator() + "  " + task);
@@ -95,8 +95,8 @@ public class Ui implements AutoCloseable {
     /**
      * Confirms that a task was deleted and reports the remaining count.
      *
-     * @param task task that was deleted
-     * @param remainingTaskCount number of tasks remaining
+     * @param task task that was deleted.
+     * @param remainingTaskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int remainingTaskCount) {
         String taskLabel = remainingTaskCount == 1 ? "task" : "tasks";
@@ -108,7 +108,7 @@ public class Ui implements AutoCloseable {
     /**
      * Displays a response enclosed by separator lines.
      *
-     * @param response response to display
+     * @param response response to display.
      */
     public void showResponse(String response) {
         System.out.println(SEPARATOR);
@@ -119,12 +119,12 @@ public class Ui implements AutoCloseable {
     /**
      * Displays all stored tasks using one-based numbering.
      *
-     * @param tasks tasks to display
+     * @param tasks tasks to display.
      */
     public void showTasks(TaskList tasks) {
         System.out.println(SEPARATOR);
         System.out.println(TASK_LIST_HEADER);
-        for (int index = 0; index < tasks.size(); index++) {
+        for (int index = 0; index < tasks.getTaskCount(); index++) {
             System.out.printf("%d.%s%n", index + 1, tasks.get(index));
         }
         System.out.println(SEPARATOR);

@@ -8,7 +8,7 @@ public class Todo extends Task {
     /**
      * Creates an incomplete to-do with the given description.
      *
-     * @param description description of the to-do
+     * @param description description of the to-do.
      */
     public Todo(String description) {
         super(description);
@@ -17,7 +17,7 @@ public class Todo extends Task {
     /**
      * Returns this to-do in the persistent storage format.
      *
-     * @return serialized to-do data
+     * @return serialized to-do data.
      */
     @Override
     public String toDataString() {
@@ -27,7 +27,7 @@ public class Todo extends Task {
     /**
      * Returns the to-do formatted with its task type.
      *
-     * @return type, completion status, and description
+     * @return type, completion status, and description.
      */
     @Override
     public String toString() {

@@ -17,19 +17,19 @@ class TaskListTest {
 
     @Test
     void constructor_defensivelyCopiesCallerCollection() {
-        List<Task> source = new ArrayList<>();
-        source.add(new Todo("original"));
+        List<Task> sourceTasks = new ArrayList<>();
+        sourceTasks.add(new Todo("original"));
 
-        TaskList taskList = new TaskList(source);
-        source.add(new Todo("external change"));
+        TaskList taskList = new TaskList(sourceTasks);
+        sourceTasks.add(new Todo("external change"));
 
         assertAll(
-                () -> assertEquals(1, taskList.size()),
+                () -> assertEquals(1, taskList.getTaskCount()),
                 () -> assertEquals("[T][ ] original", taskList.get(0).toString()));
     }
 
     @Test
-    void addGetAndSize_preserveInsertionOrder() {
+    void addGetAndTaskCount_preserveInsertionOrder() {
         Task first = new Todo("first");
         Task second = new Todo("second");
         TaskList taskList = new TaskList();
@@ -38,7 +38,7 @@ class TaskListTest {
         taskList.add(second);
 
         assertAll(
-                () -> assertEquals(2, taskList.size()),
+                () -> assertEquals(2, taskList.getTaskCount()),
                 () -> assertSame(first, taskList.get(0)),
                 () -> assertSame(second, taskList.get(1)));
     }
@@ -78,13 +78,13 @@ class TaskListTest {
         Task first = new Todo("first");
         TaskList taskList = new TaskList(List.of(first));
 
-        List<Task> snapshot = taskList.getTasks();
+        List<Task> taskSnapshot = taskList.getTasks();
         taskList.add(new Todo("later"));
 
         assertAll(
-                () -> assertEquals(List.of(first), snapshot),
+                () -> assertEquals(List.of(first), taskSnapshot),
                 () -> assertThrows(UnsupportedOperationException.class,
-                        () -> snapshot.add(new Todo("not allowed"))),
-                () -> assertEquals(2, taskList.size()));
+                        () -> taskSnapshot.add(new Todo("not allowed"))),
+                () -> assertEquals(2, taskList.getTaskCount()));
     }
 }

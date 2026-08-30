@@ -66,7 +66,7 @@ class UiTest {
 
         String lineSeparator = System.lineSeparator();
         assertEquals(SEPARATOR + lineSeparator + "message" + lineSeparator
-                + SEPARATOR + lineSeparator, output());
+                + SEPARATOR + lineSeparator, getOutput());
     }
 
     @Test
@@ -77,10 +77,10 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(output().contains("____ _____  _    _   _ ___ _____")),
-                () -> assertTrue(output().contains("Hello! I'm Staniz")),
-                () -> assertTrue(output().contains("What can I do for you?")),
-                () -> assertTrue(output().contains("Bye. Hope to see you again soon!")));
+                () -> assertTrue(getOutput().contains("____ _____  _    _   _ ___ _____")),
+                () -> assertTrue(getOutput().contains("Hello! I'm Staniz")),
+                () -> assertTrue(getOutput().contains("What can I do for you?")),
+                () -> assertTrue(getOutput().contains("Bye. Hope to see you again soon!")));
     }
 
     @Test
@@ -94,9 +94,9 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(output().contains("Here are the tasks in your list:")),
-                () -> assertTrue(output().contains("1.[T][ ] first")),
-                () -> assertTrue(output().contains("2.[D][ ] second (by: Sep 02 2026)")));
+                () -> assertTrue(getOutput().contains("Here are the tasks in your list:")),
+                () -> assertTrue(getOutput().contains("1.[T][ ] first")),
+                () -> assertTrue(getOutput().contains("2.[D][ ] second (by: Sep 02 2026)")));
     }
 
     @Test
@@ -113,15 +113,15 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(output().contains("added: [T][ ] read book")),
-                () -> assertTrue(output().contains(
+                () -> assertTrue(getOutput().contains("added: [T][ ] read book")),
+                () -> assertTrue(getOutput().contains(
                         "Nice! I've marked this task as done:" + System.lineSeparator()
                                 + "  [T][X] read book")),
-                () -> assertTrue(output().contains(
+                () -> assertTrue(getOutput().contains(
                         "OK, I've marked this task as not done yet:" + System.lineSeparator()
                                 + "  [T][ ] read book")),
-                () -> assertTrue(output().contains("Now you have 1 task in the list.")),
-                () -> assertTrue(output().contains("Now you have 2 tasks in the list.")));
+                () -> assertTrue(getOutput().contains("Now you have 1 task in the list.")),
+                () -> assertTrue(getOutput().contains("Now you have 2 tasks in the list.")));
     }
 
     private Ui createUi(String input) {
@@ -129,7 +129,7 @@ class UiTest {
         return new Ui();
     }
 
-    private String output() {
+    private String getOutput() {
         return capturedOutput.toString(UTF_8);
     }
 }

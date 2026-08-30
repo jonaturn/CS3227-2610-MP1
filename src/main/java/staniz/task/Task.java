@@ -16,7 +16,7 @@ public abstract class Task {
     /**
      * Creates an incomplete task with the given description.
      *
-     * @param description description of the task
+     * @param description description of the task.
      */
     public Task(String description) {
         this.description = description;
@@ -40,7 +40,7 @@ public abstract class Task {
     /**
      * Returns the symbol representing the task's completion status.
      *
-     * @return X if completed, or a blank space otherwise
+     * @return X if completed, or a blank space otherwise.
      */
     public String getStatusIcon() {
         return isDone ? DONE_ICON : NOT_DONE_ICON;
@@ -49,8 +49,8 @@ public abstract class Task {
     /**
      * Returns the common type, status, and description fields for persistence.
      *
-     * @param taskType single-character task type identifier
-     * @return serialized common task fields
+     * @param taskType single-character task type identifier.
+     * @return serialized common task fields.
      */
     protected String getDataPrefix(String taskType) {
         String completionValue = isDone ? "1" : "0";
@@ -60,8 +60,8 @@ public abstract class Task {
     /**
      * Escapes field separator and escape characters in a persisted text value.
      *
-     * @param value task value to encode
-     * @return value safe for the persistent task format
+     * @param value task value to encode.
+     * @return value safe for the persistent task format.
      */
     protected String encodeDataField(String value) {
         return value.replace("\\", "\\\\").replace("|", "\\|");
@@ -70,14 +70,14 @@ public abstract class Task {
     /**
      * Returns this task in the persistent storage format.
      *
-     * @return serialized task data
+     * @return serialized task data.
      */
     public abstract String toDataString();
 
     /**
      * Returns the task formatted for display.
      *
-     * @return completion status followed by the description
+     * @return completion status followed by the description.
      */
     @Override
     public String toString() {

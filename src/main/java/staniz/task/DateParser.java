@@ -18,8 +18,8 @@ public final class DateParser {
     /**
      * Parses an ISO calendar date such as {@code 2019-12-02}.
      *
-     * @param dateText date in yyyy-MM-dd format
-     * @return parsed calendar date
+     * @param dateText date in yyyy-MM-dd format.
+     * @return parsed calendar date.
      */
     public static LocalDate parse(String dateText) {
         return LocalDate.parse(dateText, DateTimeFormatter.ISO_LOCAL_DATE);
@@ -28,8 +28,8 @@ public final class DateParser {
     /**
      * Formats a date for user-facing task descriptions.
      *
-     * @param date date to format
-     * @return date such as {@code Dec 02 2019}
+     * @param date date to format.
+     * @return date such as {@code Dec 02 2019}.
      */
     public static String format(LocalDate date) {
         return date.format(DISPLAY_FORMATTER);

@@ -29,9 +29,9 @@ public final class Parser {
     /**
      * Identifies the command invoked by the given input.
      *
-     * @param input complete user input
-     * @return matching command type
-     * @throws StanizException if the input is blank or does not invoke a supported command
+     * @param input complete user input.
+     * @return matching command type.
+     * @throws StanizException if the input is blank or does not invoke a supported command.
      */
     public static CommandType parseCommandType(String input) throws StanizException {
         if (input.isBlank()) {
@@ -48,9 +48,9 @@ public final class Parser {
     /**
      * Parses a to-do command into a task.
      *
-     * @param input complete to-do command
-     * @return parsed to-do
-     * @throws StanizException if the description is missing
+     * @param input complete to-do command.
+     * @return parsed to-do.
+     * @throws StanizException if the description is missing.
      */
     public static Todo parseTodo(String input) throws StanizException {
         String description = getCommandArgument(input, CommandType.TODO);
@@ -63,9 +63,9 @@ public final class Parser {
     /**
      * Parses a deadline command into a task.
      *
-     * @param input complete deadline command
-     * @return parsed deadline
-     * @throws StanizException if a required field or valid date is missing
+     * @param input complete deadline command.
+     * @return parsed deadline.
+     * @throws StanizException if a required field or valid date is missing.
      */
     public static Deadline parseDeadline(String input) throws StanizException {
         String arguments = getCommandArgument(input, CommandType.DEADLINE);
@@ -89,9 +89,9 @@ public final class Parser {
     /**
      * Parses an event command into a task.
      *
-     * @param input complete event command
-     * @return parsed event
-     * @throws StanizException if a required field, valid date, or valid date range is missing
+     * @param input complete event command.
+     * @return parsed event.
+     * @throws StanizException if a required field, valid date, or valid date range is missing.
      */
     public static Event parseEvent(String input) throws StanizException {
         String arguments = getCommandArgument(input, CommandType.EVENT);
@@ -130,11 +130,11 @@ public final class Parser {
     /**
      * Parses and validates the one-based task number supplied to a task command.
      *
-     * @param input complete user input
-     * @param commandType command type used to parse the number and provide error guidance
-     * @param taskCount number of tasks currently stored
-     * @return validated zero-based task index
-     * @throws StanizException if the task number is absent, malformed, or out of range
+     * @param input complete user input.
+     * @param commandType command type used to parse the number and provide error guidance.
+     * @param taskCount number of tasks currently stored.
+     * @return validated zero-based task index.
+     * @throws StanizException if the task number is absent, malformed, or out of range.
      */
     public static int parseTaskIndex(String input, CommandType commandType, int taskCount)
             throws StanizException {
@@ -161,10 +161,10 @@ public final class Parser {
     /**
      * Parses a command date and translates parser failures into user-facing guidance.
      *
-     * @param dateText date text supplied by the user
-     * @param fieldName field name used in the error message
-     * @return parsed calendar date
-     * @throws StanizException if the date is not a valid ISO calendar date
+     * @param dateText date text supplied by the user.
+     * @param fieldName field name used in the error message.
+     * @return parsed calendar date.
+     * @throws StanizException if the date is not a valid ISO calendar date.
      */
     private static LocalDate parseDate(String dateText, String fieldName) throws StanizException {
         try {
@@ -178,9 +178,9 @@ public final class Parser {
     /**
      * Extracts the argument portion of a command, returning an empty string when absent.
      *
-     * @param input complete user input
-     * @param commandType type of command whose argument should be extracted
-     * @return command argument or an empty string
+     * @param input complete user input.
+     * @param commandType type of command whose argument should be extracted.
+     * @return command argument or an empty string.
      */
     private static String getCommandArgument(String input, CommandType commandType) {
         String commandPrefix = commandType.getArgumentPrefix();
