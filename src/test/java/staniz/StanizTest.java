@@ -1,0 +1,59 @@
+package staniz;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+/**
+ * Tests the complete Staniz application loop in an isolated working directory.
+ */
+class StanizTest {
+
+    @TempDir
+    Path temporaryDirectory;
+
+    /**
+     * Runs the real entry point in a child JVM so its console and data file are isolated.
+     */
+    @Test
+    void main_withCommandsProcessesInputPersistsTasksAndExits() throws Exception {
+        Path javaExecutable = Path.of(System.getProperty("java.home"), "bin",
+                System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java");
+        Path classesDirectory = Path.of(Staniz.class.getProtectionDomain()
+                .getCodeSource().getLocation().toURI());
+        Process process = new ProcessBuilder(javaExecutable.toString(), "-cp",
+                classesDirectory.toString(), Staniz.class.getName())
+                .directory(temporaryDirectory.toFile())
+                .redirectErrorStream(true)
+                .start();
+
+        try {
+            process.getOutputStream().write("todo test gradle\nlist\nbye\n".getBytes(UTF_8));
+            process.getOutputStream().close();
+            if (!process.waitFor(10, SECONDS)) {
+                fail("Staniz did not exit within 10 seconds");
+            }
+
+            String output = new String(process.getInputStream().readAllBytes(), UTF_8);
+            assertAll(
+                    () -> assertEquals(0, process.exitValue()),
+                    () -> assertTrue(output.contains("Hello! I'm Staniz")),
+                    () -> assertTrue(output.contains("added: [T][ ] test gradle")),
+                    () -> assertTrue(output.contains("1.[T][ ] test gradle")),
+                    () -> assertTrue(output.contains("Bye. Hope to see you again soon!")),
+                    () -> assertEquals("T | 0 | test gradle",
+                            java.nio.file.Files.readString(
+                                    temporaryDirectory.resolve("data/staniz.txt"), UTF_8).strip()));
+        } finally {
+            process.destroyForcibly();
+        }
+    }
+}

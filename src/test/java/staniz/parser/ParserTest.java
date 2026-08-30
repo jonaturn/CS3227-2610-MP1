@@ -1,0 +1,134 @@
+package staniz.parser;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import staniz.command.CommandType;
+import staniz.exception.StanizException;
+
+/**
+ * Tests conversion and validation of every supported command form.
+ */
+class ParserTest {
+
+    @Test
+    void parseCommandType_supportedInputReturnsItsCommand() throws StanizException {
+        assertAll(
+                () -> assertEquals(CommandType.TODO, Parser.parseCommandType("todo read")),
+                () -> assertEquals(CommandType.DEADLINE,
+                        Parser.parseCommandType("deadline submit /by 2026-09-01")),
+                () -> assertEquals(CommandType.EVENT,
+                        Parser.parseCommandType("event lesson /from 2026-09-01 /to 2026-09-02")),
+                () -> assertEquals(CommandType.LIST, Parser.parseCommandType("list")),
+                () -> assertEquals(CommandType.MARK, Parser.parseCommandType("mark 1")),
+                () -> assertEquals(CommandType.UNMARK, Parser.parseCommandType("unmark 1")),
+                () -> assertEquals(CommandType.DELETE, Parser.parseCommandType("delete 1")),
+                () -> assertEquals(CommandType.BYE, Parser.parseCommandType("bye")));
+    }
+
+    @Test
+    void parseCommandType_blankAndUnknownInputExplainsTheProblem() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseCommandType("   "),
+                        "OOPS! Please enter a command."),
+                () -> assertParsingError(() -> Parser.parseCommandType("dance"),
+                        "OOPS! I don't recognize that command. "
+                                + "Try todo, deadline, event, list, mark, unmark, delete, or bye."));
+    }
+
+    @Test
+    void parseTodo_validInputBuildsTodo() throws StanizException {
+        assertEquals("T | 0 | borrow book", Parser.parseTodo("todo borrow book").toDataString());
+    }
+
+    @Test
+    void parseTodo_missingDescriptionIsRejected() {
+        assertParsingError(() -> Parser.parseTodo("todo"),
+                "OOPS! A todo needs a description. Try: todo borrow book");
+    }
+
+    @Test
+    void parseDeadline_validInputBuildsDeadline() throws StanizException {
+        assertEquals("D | 0 | return book | 2026-09-01",
+                Parser.parseDeadline("deadline return book /by 2026-09-01").toDataString());
+    }
+
+    @Test
+    void parseDeadline_missingFieldsAndInvalidDatesAreRejected() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseDeadline("deadline return book"),
+                        "OOPS! A deadline needs '/by'. Try: deadline return book /by 2019-12-02"),
+                () -> assertParsingError(() -> Parser.parseDeadline("deadline  /by 2026-09-01"),
+                        "OOPS! A deadline needs a description before '/by'."),
+                () -> assertParsingError(() -> Parser.parseDeadline("deadline return book /by"),
+                        "OOPS! A deadline needs a due time after '/by'."),
+                () -> assertParsingError(() -> Parser.parseDeadline("deadline return /by 2026-02-30"),
+                        "OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02."));
+    }
+
+    @Test
+    void parseEvent_validAndSingleDayInputBuildsEvents() throws StanizException {
+        assertAll(
+                () -> assertEquals("E | 0 | conference | 2026-09-01 | 2026-09-03",
+                        Parser.parseEvent("event conference /from 2026-09-01 /to 2026-09-03")
+                                .toDataString()),
+                () -> assertEquals("E | 0 | consultation | 2026-09-01 | 2026-09-01",
+                        Parser.parseEvent("event consultation /from 2026-09-01 /to 2026-09-01")
+                                .toDataString()));
+    }
+
+    @Test
+    void parseEvent_missingFieldsInvalidDatesAndReversedRangeAreRejected() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseEvent("event meeting"),
+                        "OOPS! An event needs '/from' and '/to'. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(() -> Parser.parseEvent("event meeting /from 2026-09-01"),
+                        "OOPS! An event needs an end time after '/to'. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(() -> Parser.parseEvent("event  /from 2026-09-01 /to 2026-09-02"),
+                        "OOPS! An event needs a description before '/from'."),
+                () -> assertParsingError(() -> Parser.parseEvent("event meeting /from /to 2026-09-02"),
+                        "OOPS! An event needs a start time after '/from'."),
+                () -> assertParsingError(() -> Parser.parseEvent("event meeting /from 2026-09-01 /to"),
+                        "OOPS! An event needs an end time after '/to'."),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent("event meeting /from 2026-02-30 /to 2026-09-02"),
+                        "OOPS! The event start date must use yyyy-MM-dd, e.g. 2019-12-02."),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent("event meeting /from 2026-09-01 /to next week"),
+                        "OOPS! The event end date must use yyyy-MM-dd, e.g. 2019-12-02."),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent("event meeting /from 2026-09-03 /to 2026-09-02"),
+                        "OOPS! The event start date cannot be after the end date."));
+    }
+
+    @Test
+    void parseTaskIndex_validFirstAndLastNumbersReturnZeroBasedIndices() throws StanizException {
+        assertAll(
+                () -> assertEquals(0, Parser.parseTaskIndex("mark 1", CommandType.MARK, 3)),
+                () -> assertEquals(2, Parser.parseTaskIndex("delete 3", CommandType.DELETE, 3)));
+    }
+
+    @Test
+    void parseTaskIndex_missingMalformedAndOutOfRangeNumbersAreRejected() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseTaskIndex("mark", CommandType.MARK, 2),
+                        "OOPS! 'mark' needs a task number. Try: mark 1"),
+                () -> assertParsingError(() -> Parser.parseTaskIndex("delete one", CommandType.DELETE, 2),
+                        "OOPS! The task number must be a whole number."),
+                () -> assertParsingError(() -> Parser.parseTaskIndex("unmark 0", CommandType.UNMARK, 2),
+                        "OOPS! There is no task numbered 0. Your list currently has 2 task(s)."),
+                () -> assertParsingError(() -> Parser.parseTaskIndex("mark 3", CommandType.MARK, 2),
+                        "OOPS! There is no task numbered 3. Your list currently has 2 task(s)."));
+    }
+
+    private static void assertParsingError(Executable action, String expectedMessage) {
+        StanizException exception = assertThrows(StanizException.class, action);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+}
