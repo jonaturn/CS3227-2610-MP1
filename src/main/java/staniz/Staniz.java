@@ -99,6 +99,8 @@ public class Staniz {
             case EVENT:
                 addTask(Parser.parseEvent(input), tasks, ui);
                 break;
+            default:
+                throw new AssertionError("Unexpected command type: " + commandType);
         }
         if (commandType.changesTasks()) {
             storage.save(tasks);

@@ -4,11 +4,11 @@ package staniz.task;
  * Represents a task with a description and completion status.
  */
 public abstract class Task {
-    private static final String DONE_ICON = "X";
-    private static final String NOT_DONE_ICON = " ";
-
     /** Separator used between fields in the persistent task format. */
     protected static final String DATA_SEPARATOR = " | ";
+
+    private static final String DONE_ICON = "X";
+    private static final String NOT_DONE_ICON = " ";
 
     private final String description;
     private boolean isDone;
