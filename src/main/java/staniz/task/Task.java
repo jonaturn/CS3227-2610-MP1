@@ -47,6 +47,17 @@ public abstract class Task {
     }
 
     /**
+     * Checks whether the task description contains the given keyword.
+     * Matching is case-sensitive and accepts partial words.
+     *
+     * @param keyword text to find in the description.
+     * @return true if the description contains the keyword.
+     */
+    boolean hasDescriptionContaining(String keyword) {
+        return description.contains(keyword);
+    }
+
+    /**
      * Returns the common type, status, and description fields for persistence.
      *
      * @param taskType single-character task type identifier.

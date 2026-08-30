@@ -104,7 +104,7 @@ Expected output:
 OOPS! Please enter a command.
 OOPS! A todo needs a description. Try: todo borrow book
 added: [T][ ] borrow book
-OOPS! I don't recognize that command. Try todo, deadline, event, list, mark, unmark, delete, or bye.
+OOPS! I don't recognize that command. Try todo, deadline, event, list, find, mark, unmark, delete, or bye.
 1.[T][ ] borrow book
 ```
 
@@ -334,4 +334,39 @@ OOPS! The event start date cannot be after the end date.
 added: [E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
 1.[D][ ] leap day (by: Feb 29 2024)
 2.[E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
+```
+
+## Case 12: Find tasks by description keyword
+
+Aim: Confirm that find displays matches in order, rejects a missing keyword safely, and handles no matches.
+
+Input:
+
+```text
+todo read book
+deadline return book /by 2019-12-02
+todo buy groceries
+find book
+find
+find absent
+list
+bye
+```
+
+Expected output:
+
+```text
+added: [T][ ] read book
+added: [D][ ] return book (by: Dec 02 2019)
+added: [T][ ] buy groceries
+Here are the matching tasks in your list:
+1.[T][ ] read book
+2.[D][ ] return book (by: Dec 02 2019)
+OOPS! 'find' needs a keyword. Try: find book
+Here are the matching tasks in your list:
+Here are the tasks in your list:
+1.[T][ ] read book
+2.[D][ ] return book (by: Dec 02 2019)
+3.[T][ ] buy groceries
+Bye. Hope to see you again soon!
 ```

@@ -12,6 +12,8 @@ public enum CommandType {
     EVENT("event", true, true),
     /** Displays all stored tasks. */
     LIST("list", false, false),
+    /** Finds stored tasks by a description keyword. */
+    FIND("find", true, false),
     /** Marks a stored task as completed. */
     MARK("mark", true, true),
     /** Marks a stored task as incomplete. */

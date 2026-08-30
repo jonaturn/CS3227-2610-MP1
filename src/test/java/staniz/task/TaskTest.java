@@ -2,6 +2,8 @@ package staniz.task;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,5 +32,15 @@ class TaskTest {
                 () -> assertEquals(" ", task.getStatusIcon()),
                 () -> assertEquals("[T][ ] read book", task.toString()),
                 () -> assertEquals("T | 0 | read book", task.toDataString()));
+    }
+
+    @Test
+    void hasDescriptionContaining_matchesCaseSensitiveSubstringsOnlyInDescription() {
+        Task task = new Todo("Read library book");
+
+        assertAll(
+                () -> assertTrue(task.hasDescriptionContaining("library")),
+                () -> assertTrue(task.hasDescriptionContaining("book")),
+                () -> assertFalse(task.hasDescriptionContaining("Library")));
     }
 }

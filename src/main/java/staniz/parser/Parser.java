@@ -20,7 +20,7 @@ public final class Parser {
     private static final String EVENT_FROM_SEPARATOR = " /from";
     private static final String EVENT_TO_SEPARATOR = " /to";
     private static final String UNKNOWN_COMMAND_MESSAGE = "OOPS! I don't recognize that command. "
-            + "Try todo, deadline, event, list, mark, unmark, delete, or bye.";
+            + "Try todo, deadline, event, list, find, mark, unmark, delete, or bye.";
 
     private Parser() {
         // Utility class; prevent instantiation.
@@ -58,6 +58,21 @@ public final class Parser {
             throw new StanizException("OOPS! A todo needs a description. Try: todo borrow book");
         }
         return new Todo(description);
+    }
+
+    /**
+     * Extracts and validates the keyword supplied to a find command.
+     *
+     * @param input complete find command.
+     * @return non-blank keyword to search for.
+     * @throws StanizException if the keyword is missing.
+     */
+    public static String parseFindKeyword(String input) throws StanizException {
+        String keyword = getCommandArgument(input, CommandType.FIND).strip();
+        if (keyword.isBlank()) {
+            throw new StanizException("OOPS! 'find' needs a keyword. Try: find book");
+        }
+        return keyword;
     }
 
     /**

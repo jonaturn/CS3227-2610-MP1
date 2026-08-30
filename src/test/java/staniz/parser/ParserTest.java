@@ -24,6 +24,7 @@ class ParserTest {
                 () -> assertEquals(CommandType.EVENT,
                         Parser.parseCommandType("event lesson /from 2026-09-01 /to 2026-09-02")),
                 () -> assertEquals(CommandType.LIST, Parser.parseCommandType("list")),
+                () -> assertEquals(CommandType.FIND, Parser.parseCommandType("find lesson")),
                 () -> assertEquals(CommandType.MARK, Parser.parseCommandType("mark 1")),
                 () -> assertEquals(CommandType.UNMARK, Parser.parseCommandType("unmark 1")),
                 () -> assertEquals(CommandType.DELETE, Parser.parseCommandType("delete 1")),
@@ -37,7 +38,7 @@ class ParserTest {
                         "OOPS! Please enter a command."),
                 () -> assertParsingError(() -> Parser.parseCommandType("dance"),
                         "OOPS! I don't recognize that command. "
-                                + "Try todo, deadline, event, list, mark, unmark, delete, or bye."));
+                                + "Try todo, deadline, event, list, find, mark, unmark, delete, or bye."));
     }
 
     @Test
@@ -49,6 +50,20 @@ class ParserTest {
     void parseTodo_missingDescriptionIsRejected() {
         assertParsingError(() -> Parser.parseTodo("todo"),
                 "OOPS! A todo needs a description. Try: todo borrow book");
+    }
+
+    @Test
+    void parseFindKeyword_validInputReturnsTrimmedKeyword() throws StanizException {
+        assertEquals("return book", Parser.parseFindKeyword("find   return book  "));
+    }
+
+    @Test
+    void parseFindKeyword_missingKeywordIsRejected() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseFindKeyword("find"),
+                        "OOPS! 'find' needs a keyword. Try: find book"),
+                () -> assertParsingError(() -> Parser.parseFindKeyword("find   "),
+                        "OOPS! 'find' needs a keyword. Try: find book"));
     }
 
     @Test

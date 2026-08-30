@@ -100,6 +100,22 @@ class UiTest {
     }
 
     @Test
+    void showMatchingTasks_usesMatchingHeaderAndFreshNumbering() {
+        TaskList matchingTasks = new TaskList(List.of(
+                new Todo("read book"),
+                new Deadline("return book", LocalDate.of(2026, 9, 2))));
+
+        try (Ui ui = createUi("")) {
+            ui.showMatchingTasks(matchingTasks);
+        }
+
+        assertAll(
+                () -> assertTrue(getOutput().contains("Here are the matching tasks in your list:")),
+                () -> assertTrue(getOutput().contains("1.[T][ ] read book")),
+                () -> assertTrue(getOutput().contains("2.[D][ ] return book (by: Sep 02 2026)")));
+    }
+
+    @Test
     void taskConfirmationMethods_displayTaskStatusAndCounts() {
         Task task = new Todo("read book");
         try (Ui ui = createUi("")) {

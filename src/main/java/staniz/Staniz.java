@@ -72,6 +72,9 @@ public class Staniz {
             case LIST:
                 ui.showTasks(tasks);
                 break;
+            case FIND:
+                ui.showMatchingTasks(tasks.find(Parser.parseFindKeyword(input)));
+                break;
             case MARK:
                 Task markedTask = tasks.markAsDone(
                         Parser.parseTaskIndex(input, CommandType.MARK, tasks.getTaskCount()));

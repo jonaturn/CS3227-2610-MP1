@@ -15,6 +15,8 @@ class CommandTypeTest {
         assertTrue(CommandType.TODO.matches("todo"));
         assertTrue(CommandType.TODO.matches("todo borrow book"));
         assertFalse(CommandType.TODO.matches("todoist"));
+        assertTrue(CommandType.FIND.matches("find book"));
+        assertFalse(CommandType.FIND.matches("findbook"));
         assertTrue(CommandType.LIST.matches("list"));
         assertFalse(CommandType.LIST.matches("list extra"));
         assertTrue(CommandType.BYE.matches("bye"));
@@ -29,6 +31,7 @@ class CommandTypeTest {
         assertTrue(CommandType.MARK.changesTasks());
         assertTrue(CommandType.UNMARK.changesTasks());
         assertTrue(CommandType.DELETE.changesTasks());
+        assertFalse(CommandType.FIND.changesTasks());
         assertFalse(CommandType.LIST.changesTasks());
         assertFalse(CommandType.BYE.changesTasks());
     }

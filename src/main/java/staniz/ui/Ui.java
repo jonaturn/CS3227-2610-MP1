@@ -12,6 +12,7 @@ public class Ui implements AutoCloseable {
     private static final String ADDED_MESSAGE_PREFIX = "added: ";
     private static final String DELETED_MESSAGE = "Noted. I've removed this task:";
     private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
+    private static final String MATCHING_TASKS_HEADER = "Here are the matching tasks in your list:";
     private static final String SEPARATOR = "____________________________________________________________";
     private static final String TASK_LIST_HEADER = "Here are the tasks in your list:";
     private static final String UNMARKED_MESSAGE = "OK, I've marked this task as not done yet:";
@@ -122,8 +123,27 @@ public class Ui implements AutoCloseable {
      * @param tasks tasks to display.
      */
     public void showTasks(TaskList tasks) {
+        showTasksWithHeader(TASK_LIST_HEADER, tasks);
+    }
+
+    /**
+     * Displays matching tasks using numbering local to the search results.
+     *
+     * @param matchingTasks tasks whose descriptions matched the keyword.
+     */
+    public void showMatchingTasks(TaskList matchingTasks) {
+        showTasksWithHeader(MATCHING_TASKS_HEADER, matchingTasks);
+    }
+
+    /**
+     * Displays a task list below the supplied heading using one-based numbering.
+     *
+     * @param header heading that explains the displayed task list.
+     * @param tasks tasks to display.
+     */
+    private void showTasksWithHeader(String header, TaskList tasks) {
         System.out.println(SEPARATOR);
-        System.out.println(TASK_LIST_HEADER);
+        System.out.println(header);
         for (int index = 0; index < tasks.getTaskCount(); index++) {
             System.out.printf("%d.%s%n", index + 1, tasks.get(index));
         }

@@ -74,6 +74,22 @@ class TaskListTest {
     }
 
     @Test
+    void find_returnsMatchingTasksInOrderWithoutChangingStoredTasks() {
+        Task firstMatch = new Todo("read book");
+        Task nonMatch = new Todo("buy groceries");
+        Task secondMatch = new Todo("return book");
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+
+        TaskList matchingTasks = taskList.find("book");
+
+        assertAll(
+                () -> assertEquals(List.of(firstMatch, secondMatch), matchingTasks.getTasks()),
+                () -> assertEquals(3, taskList.getTaskCount()),
+                () -> assertEquals(0, taskList.find("Book").getTaskCount()),
+                () -> assertEquals(0, taskList.find("missing").getTaskCount()));
+    }
+
+    @Test
     void getTasks_returnsImmutableSnapshot() {
         Task first = new Todo("first");
         TaskList taskList = new TaskList(List.of(first));
