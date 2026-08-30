@@ -8,6 +8,8 @@ public enum CommandType {
     DEADLINE("deadline", true, true),
     EVENT("event", true, true),
     LIST("list", false, false),
+    /** Finds stored tasks by a description keyword. */
+    FIND("find", true, false),
     MARK("mark", true, true),
     UNMARK("unmark", true, true),
     DELETE("delete", true, true),

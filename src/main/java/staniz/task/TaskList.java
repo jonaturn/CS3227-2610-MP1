@@ -80,6 +80,23 @@ public class TaskList {
     }
 
     /**
+     * Finds tasks whose descriptions contain the given keyword.
+     * Matching tasks retain their original order in a separate task list.
+     *
+     * @param keyword text to find in task descriptions.
+     * @return task list containing all matching tasks.
+     */
+    public TaskList find(String keyword) {
+        List<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.hasDescriptionContaining(keyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return new TaskList(matchingTasks);
+    }
+
+    /**
      * Returns the number of stored tasks.
      *
      * @return task count
