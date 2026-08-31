@@ -87,48 +87,88 @@ public class Staniz {
      */
     public CommandResult executeCommand(String input) throws StanizException, StorageException {
         CommandType commandType = Parser.parseCommandType(input);
-        String response;
-        switch (commandType) {
-            case BYE:
-                return new CommandResult(ResponseFormatter.getFarewellMessage(), true);
-            case LIST:
-                response = ResponseFormatter.formatTasks(tasks);
-                break;
-            case FIND:
-                response = ResponseFormatter.formatMatchingTasks(
-                        tasks.find(Parser.parseFindKeyword(input)));
-                break;
-            case MARK:
-                Task markedTask = tasks.markAsDone(
-                        Parser.parseTaskIndex(input, CommandType.MARK, tasks.getTaskCount()));
-                response = ResponseFormatter.formatTaskMarked(markedTask);
-                break;
-            case UNMARK:
-                Task unmarkedTask = tasks.markAsNotDone(
-                        Parser.parseTaskIndex(input, CommandType.UNMARK, tasks.getTaskCount()));
-                response = ResponseFormatter.formatTaskUnmarked(unmarkedTask);
-                break;
-            case DELETE:
-                Task deletedTask = tasks.delete(
-                        Parser.parseTaskIndex(input, CommandType.DELETE, tasks.getTaskCount()));
-                response = ResponseFormatter.formatTaskDeleted(deletedTask, tasks.getTaskCount());
-                break;
-            case TODO:
-                response = addTask(Parser.parseTodo(input));
-                break;
-            case DEADLINE:
-                response = addTask(Parser.parseDeadline(input));
-                break;
-            case EVENT:
-                response = addTask(Parser.parseEvent(input));
-                break;
-            default:
-                throw new AssertionError("Unexpected command type: " + commandType);
+        if (commandType == CommandType.BYE) {
+            return new CommandResult(ResponseFormatter.getFarewellMessage(), true);
         }
+
+        String response = executeNonExitCommand(commandType, input);
         if (commandType.changesTasks()) {
             storage.save(tasks);
         }
         return new CommandResult(response, false);
+    }
+
+    /**
+     * Delegates a non-exit command to the operation responsible for it.
+     * Keeping this method at one abstraction level makes the supported command
+     * paths visible without exposing each path's parsing and mutation details.
+     *
+     * @param commandType validated command to execute.
+     * @param input complete user input.
+     * @return user-facing response for the command.
+     * @throws StanizException if the command arguments are invalid.
+     */
+    private String executeNonExitCommand(CommandType commandType, String input) throws StanizException {
+        return switch (commandType) {
+            case LIST -> ResponseFormatter.formatTasks(tasks);
+            case FIND -> findTasks(input);
+            case MARK -> markTask(input);
+            case UNMARK -> unmarkTask(input);
+            case DELETE -> deleteTask(input);
+            case TODO -> addTask(Parser.parseTodo(input));
+            case DEADLINE -> addTask(Parser.parseDeadline(input));
+            case EVENT -> addTask(Parser.parseEvent(input));
+            case BYE -> throw new AssertionError("Exit commands are handled before dispatch");
+        };
+    }
+
+    /**
+     * Finds tasks matching the command's keyword and formats the results.
+     *
+     * @param input complete find command.
+     * @return matching-task response.
+     * @throws StanizException if the search keyword is missing.
+     */
+    private String findTasks(String input) throws StanizException {
+        return ResponseFormatter.formatMatchingTasks(
+                tasks.find(Parser.parseFindKeyword(input)));
+    }
+
+    /**
+     * Marks the task selected by the command as completed.
+     *
+     * @param input complete mark command.
+     * @return completion confirmation.
+     * @throws StanizException if the task number is invalid.
+     */
+    private String markTask(String input) throws StanizException {
+        int taskIndex = Parser.parseTaskIndex(input, CommandType.MARK, tasks.getTaskCount());
+        return ResponseFormatter.formatTaskMarked(tasks.markAsDone(taskIndex));
+    }
+
+    /**
+     * Marks the task selected by the command as incomplete.
+     *
+     * @param input complete unmark command.
+     * @return incomplete-status confirmation.
+     * @throws StanizException if the task number is invalid.
+     */
+    private String unmarkTask(String input) throws StanizException {
+        int taskIndex = Parser.parseTaskIndex(input, CommandType.UNMARK, tasks.getTaskCount());
+        return ResponseFormatter.formatTaskUnmarked(tasks.markAsNotDone(taskIndex));
+    }
+
+    /**
+     * Deletes the task selected by the command.
+     *
+     * @param input complete delete command.
+     * @return deletion confirmation.
+     * @throws StanizException if the task number is invalid.
+     */
+    private String deleteTask(String input) throws StanizException {
+        int taskIndex = Parser.parseTaskIndex(input, CommandType.DELETE, tasks.getTaskCount());
+        Task deletedTask = tasks.delete(taskIndex);
+        return ResponseFormatter.formatTaskDeleted(deletedTask, tasks.getTaskCount());
     }
 
     /**
