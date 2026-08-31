@@ -60,4 +60,20 @@ class ResponseFormatterTest {
                 () -> assertTrue(storedTasks.contains("2.[T][ ] second")),
                 () -> assertTrue(matchingTasks.startsWith("Matching objectives:")));
     }
+
+    @Test
+    void emptyListsAndDeletionCounts_useBoundaryAppropriateWording() {
+        TaskList emptyTasks = new TaskList();
+        Todo deletedTask = new Todo("finished");
+
+        assertAll(
+                () -> assertEquals("Current training plan:",
+                        ResponseFormatter.formatTasks(emptyTasks)),
+                () -> assertEquals("Matching objectives:",
+                        ResponseFormatter.formatMatchingTasks(emptyTasks)),
+                () -> assertTrue(ResponseFormatter.formatTaskDeleted(deletedTask, 0)
+                        .endsWith("You have 0 objectives left in the program.")),
+                () -> assertTrue(ResponseFormatter.formatTaskDeleted(deletedTask, 1)
+                        .endsWith("You have 1 objective left in the program.")));
+    }
 }

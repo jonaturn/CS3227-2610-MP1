@@ -59,6 +59,16 @@ class UiTest {
     }
 
     @Test
+    void close_releasesConsoleInputReader() {
+        CloseTrackingInputStream input = new CloseTrackingInputStream();
+        System.setIn(input);
+
+        new Ui().close();
+
+        assertTrue(input.isClosed());
+    }
+
+    @Test
     void showResponse_enclosesTextWithSeparators() {
         try (Ui ui = createUi("")) {
             ui.showResponse("message");
@@ -151,5 +161,25 @@ class UiTest {
 
     private String getOutput() {
         return capturedOutput.toString(UTF_8);
+    }
+
+    /**
+     * Records whether a UI closes the input stream that backs its scanner.
+     */
+    private static final class CloseTrackingInputStream extends ByteArrayInputStream {
+        private boolean isClosed;
+
+        private CloseTrackingInputStream() {
+            super(new byte[0]);
+        }
+
+        @Override
+        public void close() {
+            isClosed = true;
+        }
+
+        private boolean isClosed() {
+            return isClosed;
+        }
     }
 }

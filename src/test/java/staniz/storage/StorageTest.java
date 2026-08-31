@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -75,14 +76,18 @@ class StorageTest {
     @Test
     void load_malformedFieldsEscapesStatusesDatesAndRangesAreRejected() {
         assertAll(
+                () -> assertInvalidData("T", "missing task type or completion status"),
                 () -> assertInvalidData("X | 0 | unknown", "unknown task type 'X'"),
                 () -> assertInvalidData("T | 2 | invalid status", "completion status must be 0 or 1"),
                 () -> assertInvalidData("T | 0 | unfinished\\", "incomplete escape sequence"),
                 () -> assertInvalidData("T | 0 | bad\\q", "unsupported escape sequence '\\q'"),
                 () -> assertInvalidData("T | 0", "expected 3 fields but found 2"),
                 () -> assertInvalidData("T | 0 |   ", "description cannot be empty"),
+                () -> assertInvalidData("D | 0 | report", "expected 4 fields but found 3"),
                 () -> assertInvalidData("D | 0 | report | 2026-02-30",
                         "deadline date must use yyyy-MM-dd"),
+                () -> assertInvalidData("E | 0 | trip | 2026-09-03",
+                        "expected 5 fields but found 4"),
                 () -> assertInvalidData("E | 0 | trip | 2026-09-03 | 2026-09-02",
                         "event start date cannot be after the end date"));
     }
@@ -97,6 +102,34 @@ class StorageTest {
 
         assertEquals("Saved task data is invalid on line 2: completion status must be 0 or 1.",
                 exception.getMessage());
+    }
+
+    @Test
+    void load_directoryInsteadOfFileReportsReadFailureWithCause() throws Exception {
+        Path directory = temporaryDirectory.resolve("tasks-directory");
+        Files.createDirectory(directory);
+
+        StorageException exception = assertThrows(StorageException.class,
+                () -> new Storage(directory).load());
+
+        assertAll(
+                () -> assertEquals("I couldn't read saved tasks from " + directory + ".",
+                        exception.getMessage()),
+                () -> assertTrue(exception.getCause() instanceof IOException));
+    }
+
+    @Test
+    void save_directoryInsteadOfFileReportsWriteFailureWithCause() throws Exception {
+        Path directory = temporaryDirectory.resolve("tasks-directory");
+        Files.createDirectory(directory);
+
+        StorageException exception = assertThrows(StorageException.class,
+                () -> new Storage(directory).save(new TaskList(new Todo("task"))));
+
+        assertAll(
+                () -> assertEquals("I couldn't save tasks to " + directory + ".",
+                        exception.getMessage()),
+                () -> assertTrue(exception.getCause() instanceof IOException));
     }
 
     private void assertInvalidData(String line, String expectedProblem) throws Exception {

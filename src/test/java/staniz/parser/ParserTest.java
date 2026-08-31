@@ -94,6 +94,9 @@ class ParserTest {
                                 .toDataString()),
                 () -> assertEquals("E | 0 | consultation | 2026-09-01 | 2026-09-01",
                         Parser.parseEvent("event consultation /from 2026-09-01 /to 2026-09-01")
+                                .toDataString()),
+                () -> assertEquals("E | 0 | x /to | 2026-09-01 | 2026-09-02",
+                        Parser.parseEvent("event x /to /from 2026-09-01 /to 2026-09-02")
                                 .toDataString()));
     }
 
