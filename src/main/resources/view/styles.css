@@ -34,27 +34,31 @@
 .user-dialog,
 .staniz-dialog,
 .error-dialog {
-    -fx-background-radius: 14;
     -fx-font-size: 13px;
     -fx-line-spacing: 2px;
 }
 
 .user-dialog {
-    -fx-background-color: #3157d5;
+    -fx-background-color: #047857;
+    -fx-background-radius: 16 16 4 16;
     -fx-text-fill: white;
 }
 
 .staniz-dialog {
     -fx-background-color: white;
-    -fx-border-color: #dbe1ea;
-    -fx-border-radius: 14;
+    -fx-background-radius: 3 12 12 3;
+    -fx-border-color: transparent transparent transparent #047857;
+    -fx-border-radius: 3 12 12 3;
+    -fx-border-width: 0 0 0 3;
     -fx-text-fill: #1f2937;
 }
 
 .error-dialog {
     -fx-background-color: #fff1f2;
-    -fx-border-color: #fecdd3;
-    -fx-border-radius: 14;
+    -fx-background-radius: 3 12 12 3;
+    -fx-border-color: transparent transparent transparent #e11d48;
+    -fx-border-radius: 3 12 12 3;
+    -fx-border-width: 0 0 0 3;
     -fx-text-fill: #9f1239;
 }
 
@@ -71,11 +75,11 @@
 }
 
 .text-field:focused {
-    -fx-border-color: #3157d5;
+    -fx-border-color: #047857;
 }
 
 .button {
-    -fx-background-color: #3157d5;
+    -fx-background-color: #047857;
     -fx-background-radius: 10;
     -fx-cursor: hand;
     -fx-font-weight: bold;
@@ -84,5 +88,5 @@
 }
 
 .button:hover {
-    -fx-background-color: #2747b5;
+    -fx-background-color: #065f46;
 }
