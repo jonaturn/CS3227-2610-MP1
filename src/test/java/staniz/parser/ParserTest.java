@@ -28,7 +28,10 @@ class ParserTest {
                 () -> assertEquals(CommandType.MARK, Parser.parseCommandType("mark 1")),
                 () -> assertEquals(CommandType.UNMARK, Parser.parseCommandType("unmark 1")),
                 () -> assertEquals(CommandType.DELETE, Parser.parseCommandType("delete 1")),
-                () -> assertEquals(CommandType.BYE, Parser.parseCommandType("bye")));
+                () -> assertEquals(CommandType.BYE, Parser.parseCommandType("bye")),
+                () -> assertEquals(CommandType.TODO,
+                        Parser.parseCommandType("  todo\tborrow book  ")),
+                () -> assertEquals(CommandType.LIST, Parser.parseCommandType("  list\t")));
     }
 
     @Test
@@ -42,8 +45,21 @@ class ParserTest {
     }
 
     @Test
+    void parseCommandType_noArgumentCommandsRejectUnexpectedArguments() {
+        assertAll(
+                () -> assertParsingError(() -> Parser.parseCommandType("list extra"),
+                        "Form check: 'list' does not take arguments. Try: list"),
+                () -> assertParsingError(() -> Parser.parseCommandType("  bye\tnow  "),
+                        "Form check: 'bye' does not take arguments. Try: bye"));
+    }
+
+    @Test
     void parseTodo_validInputBuildsTodo() throws StanizException {
-        assertEquals("T | 0 | borrow book", Parser.parseTodo("todo borrow book").toDataString());
+        assertAll(
+                () -> assertEquals("T | 0 | borrow book",
+                        Parser.parseTodo("todo borrow book").toDataString()),
+                () -> assertEquals("T | 0 | borrow   book",
+                        Parser.parseTodo("  todo\t  borrow   book  ").toDataString()));
     }
 
     @Test
@@ -82,6 +98,11 @@ class ParserTest {
                         "Form check: a deadline needs a description before '/by'."),
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline return book /by"),
                         "Form check: a deadline needs a due time after '/by'."),
+                () -> assertParsingError(
+                        () -> Parser.parseDeadline(
+                                "deadline return book /by 2026-09-01 /by 2026-09-02"),
+                        "Form check: '/by' must be specified exactly once. "
+                                + "Try: deadline return book /by 2019-12-02"),
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline return /by 2026-02-30"),
                         "Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02."));
     }
@@ -95,8 +116,9 @@ class ParserTest {
                 () -> assertEquals("E | 0 | consultation | 2026-09-01 | 2026-09-01",
                         Parser.parseEvent("event consultation /from 2026-09-01 /to 2026-09-01")
                                 .toDataString()),
-                () -> assertEquals("E | 0 | x /to | 2026-09-01 | 2026-09-02",
-                        Parser.parseEvent("event x /to /from 2026-09-01 /to 2026-09-02")
+                () -> assertEquals("E | 0 | spaced   event | 2026-09-01 | 2026-09-02",
+                        Parser.parseEvent(
+                                "  event\tspaced   event\t/from\t2026-09-01   /to\t2026-09-02  ")
                                 .toDataString()));
     }
 
@@ -116,6 +138,25 @@ class ParserTest {
                 () -> assertParsingError(() -> Parser.parseEvent("event meeting /from 2026-09-01 /to"),
                         "Form check: an event needs an end time after '/to'."),
                 () -> assertParsingError(
+                        () -> Parser.parseEvent("event meeting /to 2026-09-02 /from 2026-09-01"),
+                        "Form check: '/from' must appear before '/to'. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent(
+                                "event meeting /from 2026-09-01 /from 2026-09-02 /to 2026-09-03"),
+                        "Form check: '/from' must be specified exactly once. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent(
+                                "event meeting /from 2026-09-01 /from 2026-09-02"),
+                        "Form check: '/from' must be specified exactly once. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(
+                        () -> Parser.parseEvent(
+                                "event meeting /from 2026-09-01 /to 2026-09-02 /to 2026-09-03"),
+                        "Form check: '/to' must be specified exactly once. "
+                                + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
+                () -> assertParsingError(
                         () -> Parser.parseEvent("event meeting /from 2026-02-30 /to 2026-09-02"),
                         "Form check: the event start date must use yyyy-MM-dd, e.g. 2019-12-02."),
                 () -> assertParsingError(
@@ -130,7 +171,9 @@ class ParserTest {
     void parseTaskIndex_validFirstAndLastNumbersReturnZeroBasedIndices() throws StanizException {
         assertAll(
                 () -> assertEquals(0, Parser.parseTaskIndex("mark 1", CommandType.MARK, 3)),
-                () -> assertEquals(2, Parser.parseTaskIndex("delete 3", CommandType.DELETE, 3)));
+                () -> assertEquals(2, Parser.parseTaskIndex("delete 3", CommandType.DELETE, 3)),
+                () -> assertEquals(0,
+                        Parser.parseTaskIndex("  mark\t  1  ", CommandType.MARK, 3)));
     }
 
     @Test

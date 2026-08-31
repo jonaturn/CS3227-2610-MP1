@@ -3,6 +3,7 @@ package staniz.storage;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,7 +71,10 @@ class StorageTest {
 
         storage.save(new TaskList(List.of(new Todo("replacement"))));
 
-        assertEquals(List.of("T | 0 | replacement"), Files.readAllLines(dataFile, UTF_8));
+        assertAll(
+                () -> assertEquals(List.of("T | 0 | replacement"),
+                        Files.readAllLines(dataFile, UTF_8)),
+                () -> assertFalse(hasTemporaryDataFile(temporaryDirectory)));
     }
 
     @Test
@@ -129,6 +133,20 @@ class StorageTest {
         assertAll(
                 () -> assertEquals("I couldn't save tasks to " + directory + ".",
                         exception.getMessage()),
+                () -> assertTrue(exception.getCause() instanceof IOException),
+                () -> assertFalse(hasTemporaryDataFile(temporaryDirectory)));
+    }
+
+    @Test
+    void save_fileSystemRootReportsWriteFailureBeforeCreatingTemporaryFile() {
+        Path fileSystemRoot = temporaryDirectory.getRoot();
+
+        StorageException exception = assertThrows(StorageException.class,
+                () -> new Storage(fileSystemRoot).save(new TaskList(new Todo("task"))));
+
+        assertAll(
+                () -> assertEquals("I couldn't save tasks to " + fileSystemRoot + ".",
+                        exception.getMessage()),
                 () -> assertTrue(exception.getCause() instanceof IOException));
     }
 
@@ -139,5 +157,18 @@ class StorageTest {
                 () -> new Storage(dataFile).load());
         assertEquals("Saved task data is invalid on line 1: " + expectedProblem + ".",
                 exception.getMessage());
+    }
+
+    /**
+     * Checks whether an interrupted atomic save left a sibling temporary file behind.
+     *
+     * @param directory directory containing the configured data path.
+     * @return true if a Staniz temporary data file remains.
+     * @throws IOException if the directory cannot be inspected.
+     */
+    private boolean hasTemporaryDataFile(Path directory) throws IOException {
+        try (var files = Files.list(directory)) {
+            return files.anyMatch(path -> path.getFileName().toString().startsWith(".staniz-"));
+        }
     }
 }

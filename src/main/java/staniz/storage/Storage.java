@@ -2,8 +2,10 @@ package staniz.storage;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -23,6 +25,8 @@ import staniz.task.Todo;
  */
 public class Storage {
     private static final Path DEFAULT_FILE_PATH = Path.of("data", "staniz.txt");
+    private static final String TEMPORARY_FILE_PREFIX = ".staniz-";
+    private static final String TEMPORARY_FILE_SUFFIX = ".tmp";
 
     private final Path filePath;
 
@@ -72,20 +76,62 @@ public class Storage {
      * @throws StorageException if directories or the data file cannot be written.
      */
     public void save(TaskList taskList) throws StorageException {
+        Path temporaryFile = null;
         try {
-            Path parentDirectory = filePath.getParent();
-            if (parentDirectory != null) {
-                Files.createDirectories(parentDirectory);
+            Path absoluteFilePath = filePath.toAbsolutePath().normalize();
+            Path parentDirectory = absoluteFilePath.getParent();
+            if (parentDirectory == null) {
+                throw new IOException("The data file has no parent directory.");
             }
+            Files.createDirectories(parentDirectory);
 
             List<String> lines = taskList.getTasks().stream()
                     .map(Task::toDataString)
                     .toList();
-            Files.write(filePath, lines, StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+            temporaryFile = Files.createTempFile(
+                    parentDirectory, TEMPORARY_FILE_PREFIX, TEMPORARY_FILE_SUFFIX);
+            Files.write(temporaryFile, lines, StandardCharsets.UTF_8,
+                    StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE);
+            replaceDataFile(temporaryFile, absoluteFilePath);
         } catch (IOException exception) {
+            deleteTemporaryFile(temporaryFile, exception);
             throw new StorageException("I couldn't save tasks to " + filePath + ".", exception);
+        }
+    }
+
+    /**
+     * Replaces the data file atomically when the file system supports it.
+     * A normal replacement is used as a compatibility fallback while still ensuring
+     * that the complete temporary file is written before the existing file is touched.
+     *
+     * @param temporaryFile fully written temporary data file.
+     * @param absoluteFilePath destination data file.
+     * @throws IOException if neither replacement strategy succeeds.
+     */
+    private void replaceDataFile(Path temporaryFile, Path absoluteFilePath) throws IOException {
+        try {
+            Files.move(temporaryFile, absoluteFilePath,
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException exception) {
+            Files.move(temporaryFile, absoluteFilePath, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    /**
+     * Removes an incomplete temporary file without hiding the original save failure.
+     *
+     * @param temporaryFile temporary file, or {@code null} if creation failed.
+     * @param saveFailure original file-system failure.
+     */
+    private void deleteTemporaryFile(Path temporaryFile, IOException saveFailure) {
+        if (temporaryFile == null) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(temporaryFile);
+        } catch (IOException cleanupFailure) {
+            saveFailure.addSuppressed(cleanupFailure);
         }
     }
 

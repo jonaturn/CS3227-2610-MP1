@@ -104,6 +104,29 @@ class StanizTest {
     }
 
     @Test
+    void executeCommand_withFormatErrorsRecoversWithoutChangingTasks() throws Exception {
+        Path dataFile = temporaryDirectory.resolve("staniz.txt");
+        Staniz staniz = new Staniz(new Storage(dataFile));
+        staniz.executeCommand("todo preserved task");
+        String savedTasksBeforeErrors = Files.readString(dataFile, UTF_8);
+
+        assertAll(
+                () -> assertThrows(StanizException.class,
+                        () -> staniz.executeCommand("list unexpected")),
+                () -> assertThrows(StanizException.class,
+                        () -> staniz.executeCommand(
+                                "deadline duplicate /by 2026-09-01 /by 2026-09-02")),
+                () -> assertThrows(StanizException.class,
+                        () -> staniz.executeCommand(
+                                "event reversed /to 2026-09-02 /from 2026-09-01")));
+
+        assertAll(
+                () -> assertEquals(savedTasksBeforeErrors, Files.readString(dataFile, UTF_8)),
+                () -> assertTrue(staniz.executeCommand("list").getResponse()
+                        .contains("1.[T][ ] preserved task")));
+    }
+
+    @Test
     void executeCommand_whenSavingFailsPropagatesStorageFailure() throws Exception {
         Path dataFile = temporaryDirectory.resolve("staniz.txt");
         Storage failingStorage = new Storage(dataFile) {

@@ -386,3 +386,41 @@ Current training plan:
 3.[T][ ] buy groceries
 Session complete. Stay disciplined.
 ```
+
+## Case 13: Normalize whitespace and reject ambiguous parameters
+
+Aim: Confirm that harmless command whitespace is accepted while extra or duplicated parameters are rejected without corrupting later task state.
+
+Input:
+
+```text
+   todo    spaced   task
+list unexpected
+list
+deadline duplicate /by 2019-12-02 /by 2019-12-03
+event reversed /to 2019-12-03 /from 2019-12-02
+event duplicate /from 2019-12-02 /from 2019-12-03 /to 2019-12-04
+deadline    valid deadline    /by    2019-12-02
+bye now
+list
+bye
+```
+
+Expected output:
+
+```text
+Good. Another objective locked in:
+  [T][ ] spaced   task
+Form check: 'list' does not take arguments. Try: list
+1.[T][ ] spaced   task
+Form check: '/by' must be specified exactly once. Try: deadline return book /by 2019-12-02
+Form check: '/from' must appear before '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
+Form check: '/from' must be specified exactly once. Try: event meeting /from 2019-12-02 /to 2019-12-03
+Good. Another objective locked in:
+  [D][ ] valid deadline (by: Dec 02 2019)
+Form check: 'bye' does not take arguments. Try: bye
+Current training plan:
+1.[T][ ] spaced   task
+2.[D][ ] valid deadline (by: Dec 02 2019)
+Session complete. Stay disciplined.
+```

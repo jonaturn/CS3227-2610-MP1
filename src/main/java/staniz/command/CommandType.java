@@ -47,16 +47,14 @@ public enum CommandType {
      * @return true if the input matches this command's accepted form.
      */
     public boolean matches(String input) {
-        return keyword.equals(input) || (acceptsArguments && input.startsWith(getArgumentPrefix()));
-    }
-
-    /**
-     * Returns the command keyword followed by one space.
-     *
-     * @return prefix that separates the command from its argument.
-     */
-    public String getArgumentPrefix() {
-        return keyword + " ";
+        String normalizedInput = input.strip();
+        if (keyword.equals(normalizedInput)) {
+            return true;
+        }
+        return acceptsArguments
+                && normalizedInput.startsWith(keyword)
+                && normalizedInput.length() > keyword.length()
+                && Character.isWhitespace(normalizedInput.charAt(keyword.length()));
     }
 
     /**
@@ -66,6 +64,15 @@ public enum CommandType {
      */
     public String getKeyword() {
         return keyword;
+    }
+
+    /**
+     * Reports whether text may follow this command's keyword.
+     *
+     * @return true if the command accepts an argument.
+     */
+    public boolean acceptsArguments() {
+        return acceptsArguments;
     }
 
     /**

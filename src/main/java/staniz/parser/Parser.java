@@ -2,6 +2,8 @@ package staniz.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import staniz.command.CommandType;
 import staniz.exception.StanizException;
@@ -14,11 +16,14 @@ import staniz.task.Todo;
  * Parses and validates commands entered by the user.
  */
 public final class Parser {
-    private static final String DEADLINE_SEPARATOR = " /by";
+    private static final String DEADLINE_PARAMETER = "/by";
     private static final String EMPTY_INPUT_MESSAGE = "Form check: enter a command.";
     private static final String EXAMPLE_DATE = "2019-12-02";
-    private static final String EVENT_FROM_SEPARATOR = " /from";
-    private static final String EVENT_TO_SEPARATOR = " /to";
+    private static final String EVENT_FROM_PARAMETER = "/from";
+    private static final String EVENT_TO_PARAMETER = "/to";
+    private static final Pattern DEADLINE_PARAMETER_PATTERN = createParameterPattern(DEADLINE_PARAMETER);
+    private static final Pattern EVENT_FROM_PARAMETER_PATTERN = createParameterPattern(EVENT_FROM_PARAMETER);
+    private static final Pattern EVENT_TO_PARAMETER_PATTERN = createParameterPattern(EVENT_TO_PARAMETER);
     private static final String UNKNOWN_COMMAND_MESSAGE = "Form check: I don't recognize that command. "
             + "Try todo, deadline, event, list, find, mark, unmark, delete, or bye.";
 
@@ -34,12 +39,19 @@ public final class Parser {
      * @throws StanizException if the input is blank or does not invoke a supported command.
      */
     public static CommandType parseCommandType(String input) throws StanizException {
-        if (input.isBlank()) {
+        String normalizedInput = input.strip();
+        if (normalizedInput.isBlank()) {
             throw new StanizException(EMPTY_INPUT_MESSAGE);
         }
         for (CommandType commandType : CommandType.values()) {
-            if (commandType.matches(input)) {
+            if (commandType.matches(normalizedInput)) {
                 return commandType;
+            }
+            if (!commandType.acceptsArguments()
+                    && startsWithCommandKeyword(normalizedInput, commandType)) {
+                String keyword = commandType.getKeyword();
+                throw new StanizException("Form check: '" + keyword
+                        + "' does not take arguments. Try: " + keyword);
             }
         }
         throw new StanizException(UNKNOWN_COMMAND_MESSAGE);
@@ -84,13 +96,17 @@ public final class Parser {
      */
     public static Deadline parseDeadline(String input) throws StanizException {
         String arguments = getCommandArgument(input, CommandType.DEADLINE);
-        int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
-        if (separatorIndex < 0) {
+        ParameterLocation byParameter = findParameter(arguments, DEADLINE_PARAMETER_PATTERN);
+        if (byParameter.count() == 0) {
             throw new StanizException("Form check: a deadline needs '/by'. "
                     + "Try: deadline return book /by " + EXAMPLE_DATE);
         }
-        String description = arguments.substring(0, separatorIndex);
-        String byText = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length()).strip();
+        if (byParameter.count() > 1) {
+            throw new StanizException("Form check: '/by' must be specified exactly once. "
+                    + "Try: deadline return book /by " + EXAMPLE_DATE);
+        }
+        String description = arguments.substring(0, byParameter.start()).strip();
+        String byText = arguments.substring(byParameter.end()).strip();
         if (description.isBlank()) {
             throw new StanizException("Form check: a deadline needs a description before '/by'.");
         }
@@ -110,21 +126,31 @@ public final class Parser {
      */
     public static Event parseEvent(String input) throws StanizException {
         String arguments = getCommandArgument(input, CommandType.EVENT);
-        int fromSeparatorIndex = arguments.indexOf(EVENT_FROM_SEPARATOR);
-        if (fromSeparatorIndex < 0) {
+        ParameterLocation fromParameter = findParameter(arguments, EVENT_FROM_PARAMETER_PATTERN);
+        ParameterLocation toParameter = findParameter(arguments, EVENT_TO_PARAMETER_PATTERN);
+        if (fromParameter.count() > 1) {
+            throw new StanizException("Form check: '/from' must be specified exactly once. "
+                    + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
+        }
+        if (toParameter.count() > 1) {
+            throw new StanizException("Form check: '/to' must be specified exactly once. "
+                    + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
+        }
+        if (fromParameter.count() == 0) {
             throw new StanizException("Form check: an event needs '/from' and '/to'. "
                     + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
-        int toSeparatorIndex = arguments.indexOf(EVENT_TO_SEPARATOR, fromSeparatorIndex
-                + EVENT_FROM_SEPARATOR.length());
-        if (toSeparatorIndex < 0) {
+        if (toParameter.count() == 0) {
             throw new StanizException("Form check: an event needs an end time after '/to'. "
                     + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
-        String description = arguments.substring(0, fromSeparatorIndex);
-        String fromText = arguments.substring(fromSeparatorIndex + EVENT_FROM_SEPARATOR.length(), toSeparatorIndex)
-                .strip();
-        String toText = arguments.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length()).strip();
+        if (fromParameter.start() > toParameter.start()) {
+            throw new StanizException("Form check: '/from' must appear before '/to'. "
+                    + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
+        }
+        String description = arguments.substring(0, fromParameter.start()).strip();
+        String fromText = arguments.substring(fromParameter.end(), toParameter.start()).strip();
+        String toText = arguments.substring(toParameter.end()).strip();
         if (description.isBlank()) {
             throw new StanizException("Form check: an event needs a description before '/from'.");
         }
@@ -205,7 +231,66 @@ public final class Parser {
      * @return command argument or an empty string.
      */
     private static String getCommandArgument(String input, CommandType commandType) {
-        String commandPrefix = commandType.getArgumentPrefix();
-        return input.length() < commandPrefix.length() ? "" : input.substring(commandPrefix.length());
+        String normalizedInput = input.strip();
+        int keywordLength = commandType.getKeyword().length();
+        assert normalizedInput.startsWith(commandType.getKeyword())
+                : "Arguments must be extracted from the expected command type";
+        return normalizedInput.substring(keywordLength).strip();
+    }
+
+    /**
+     * Checks whether input starts with a complete command keyword followed by arguments.
+     *
+     * @param input stripped user input.
+     * @param commandType command whose keyword is expected.
+     * @return true if the keyword is followed by whitespace and more input.
+     */
+    private static boolean startsWithCommandKeyword(String input, CommandType commandType) {
+        String keyword = commandType.getKeyword();
+        return input.startsWith(keyword)
+                && input.length() > keyword.length()
+                && Character.isWhitespace(input.charAt(keyword.length()));
+    }
+
+    /**
+     * Creates a pattern for a slash parameter surrounded by whitespace or input boundaries.
+     *
+     * @param parameter parameter token such as {@code /by}.
+     * @return compiled token pattern.
+     */
+    private static Pattern createParameterPattern(String parameter) {
+        return Pattern.compile("(?<!\\S)" + Pattern.quote(parameter) + "(?!\\S)");
+    }
+
+    /**
+     * Finds the first location and total occurrence count of a parameter token.
+     *
+     * @param arguments command arguments to inspect.
+     * @param parameterPattern token pattern to find.
+     * @return first token location and number of occurrences.
+     */
+    private static ParameterLocation findParameter(String arguments, Pattern parameterPattern) {
+        Matcher matcher = parameterPattern.matcher(arguments);
+        if (!matcher.find()) {
+            return new ParameterLocation(-1, -1, 0);
+        }
+
+        int start = matcher.start();
+        int end = matcher.end();
+        int count = 1;
+        while (matcher.find()) {
+            count++;
+        }
+        return new ParameterLocation(start, end, count);
+    }
+
+    /**
+     * Describes the first occurrence and total count of a command parameter.
+     *
+     * @param start zero-based start of the first occurrence.
+     * @param end zero-based exclusive end of the first occurrence.
+     * @param count number of occurrences.
+     */
+    private record ParameterLocation(int start, int end, int count) {
     }
 }
