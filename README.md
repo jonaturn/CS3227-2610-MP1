@@ -7,33 +7,38 @@ text commands, and saves every task-changing command locally.
 See the [Staniz User Guide](docs/README.md) for installation instructions and the
 complete command reference.
 
-## Development setup
+## Building and running
 
-Staniz requires JDK 25. From the repository root, use the Gradle wrapper so that
-the project uses its pinned Gradle version:
+Staniz requires JDK 25. Confirm that the active Java version begins with `25`:
 
-```powershell
-.\gradlew run
+```text
+java -version
 ```
 
-Useful development commands are:
+Run Staniz directly from its source directory:
 
-```powershell
-.\gradlew test
-.\gradlew check
-.\gradlew shadowJar
-```
+| Platform | Command |
+| --- | --- |
+| Windows PowerShell | `.\gradlew run` |
+| macOS/Linux | `./gradlew run` |
 
-- `test` runs the JUnit test suite.
-- `check` runs the verification lifecycle, including tests and Checkstyle.
-- `shadowJar` creates the distributable `build/libs/staniz.jar` with its runtime
-  dependencies included.
+Build the distributable JAR from the repository root:
 
-Run the packaged application with:
+| Platform | Build command | Run command |
+| --- | --- | --- |
+| Windows PowerShell | `.\gradlew shadowJar` | `java -jar .\build\libs\staniz.jar` |
+| macOS/Linux | `./gradlew shadowJar` | `java -jar build/libs/staniz.jar` |
 
-```powershell
-java -jar build/libs/staniz.jar
-```
+`shadowJar` creates `build/libs/staniz.jar` with the JavaFX and runtime
+dependencies included. A pre-built copy named `staniz.jar` can instead be
+started from its containing directory with `java -jar staniz.jar`.
+
+## Verification commands
+
+| Platform | Tests | Tests and code-quality checks |
+| --- | --- | --- |
+| Windows PowerShell | `.\gradlew test` | `.\gradlew check` |
+| macOS/Linux | `./gradlew test` | `./gradlew check` |
 
 Task data is stored relative to the directory from which Staniz is launched, at
 `data/staniz.txt`.

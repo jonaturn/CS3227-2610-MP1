@@ -13,21 +13,47 @@ You interact with Staniz by entering short commands into its chat window.
 - Java Development Kit (JDK) 25
 - The `staniz.jar` application file
 
-### Starting Staniz
+### Checking Java
+
+Open a terminal and confirm that the active Java version begins with `25`:
+
+```text
+java -version
+```
+
+Install or select JDK 25 before continuing if a different version is reported.
+
+### Starting a pre-built JAR
 
 1. Put `staniz.jar` in a folder where Staniz may create its `data` directory.
 2. Open a terminal in that folder.
-3. Run:
-
-   ```text
-   java -jar staniz.jar
-   ```
-
+3. Run `java -jar staniz.jar`.
 4. Enter a command in the text field and press **Enter** or select **Send**.
 
-If you are building Staniz from its source repository, run
-`.\gradlew shadowJar` on Windows or `./gradlew shadowJar` on macOS/Linux. The
-application will be created at `build/libs/staniz.jar`.
+### Building and starting the JAR from source
+
+Open a terminal in the repository root—the folder containing `gradlew` and
+`build.gradle`—and run the commands for your operating system:
+
+#### Windows PowerShell
+
+```powershell
+.\gradlew shadowJar
+java -jar .\build\libs\staniz.jar
+```
+
+#### macOS/Linux
+
+```bash
+./gradlew shadowJar
+java -jar build/libs/staniz.jar
+```
+
+The first command compiles Staniz and packages its JavaFX and runtime
+dependencies into `build/libs/staniz.jar`. The second command launches that JAR.
+
+To launch directly from source without first creating a JAR, run `.\gradlew run`
+on Windows or `./gradlew run` on macOS/Linux.
 
 ## Reading the task list
 
@@ -61,6 +87,19 @@ deadline.
 Command words and search keywords are case-sensitive. Dates must use the
 `yyyy-MM-dd` format, such as `2026-09-10`. Staniz accepts extra spaces or tabs
 around command elements.
+
+### Syntax notation
+
+- Type command words such as `todo` and parameter words such as `/by` exactly as
+  shown.
+- Replace uppercase placeholders such as `DESCRIPTION`, `DATE`, and
+  `TASK_NUMBER` with your own values; do not type the placeholder itself.
+- Descriptions and search keywords must contain at least one non-whitespace
+  character.
+- `TASK_NUMBER` is a one-based whole number taken from `list`.
+- `DATE`, `START_DATE`, and `END_DATE` must be real calendar dates in
+  `yyyy-MM-dd` format.
+- `list` and `bye` take no additional arguments.
 
 ## Adding a to-do
 
