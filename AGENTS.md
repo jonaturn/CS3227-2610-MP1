@@ -9,8 +9,8 @@ Unless the user says otherwise, assume that you are assisting a student working 
 # Student profile
 
 * Prior knowledge: Basic Java and OOP concepts.
-* Level of programming experience: [to be filled]
-* IDE and level of expertise: [to be filled]
+* Level of programming experience: Fairly experienced, with multiple internships; soon-to-be graduate.
+* IDE and level of expertise: Visual Studio Code; primary IDE used throughout internships and personal projects, ranging from simple applications to complex projects.
 
 # Guidance for interacting with users
 
@@ -27,6 +27,10 @@ Unless the user says otherwise, assume that you are assisting a student working 
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
+
+## UI testing
+
+Keep `test/ui-test-plan.md` synchronized with user-visible command or output changes. Interleave positive and negative cases so tests verify that rejected commands do not corrupt application state. After each code update that affects the command-line UI, invoke the project `test-ui` skill, run every applicable case, and show the console input/output record. Stop at the first failure and report the expected and actual behavior.
 
 ## Git
 

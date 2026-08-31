@@ -1,0 +1,92 @@
+.root {
+    -fx-background-color: #f3f5f9;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.header {
+    -fx-padding: 2 4 4 4;
+}
+
+.app-title {
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2937;
+}
+
+.app-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport,
+.dialog-container {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-background-insets: 0;
+    -fx-border-color: #dbe1ea;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.user-dialog,
+.staniz-dialog,
+.error-dialog {
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.user-dialog {
+    -fx-background-color: #047857;
+    -fx-background-radius: 16 16 4 16;
+    -fx-text-fill: white;
+}
+
+.staniz-dialog {
+    -fx-background-color: white;
+    -fx-background-radius: 3 12 12 3;
+    -fx-border-color: transparent transparent transparent #047857;
+    -fx-border-radius: 3 12 12 3;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #1f2937;
+}
+
+.error-dialog {
+    -fx-background-color: #fff1f2;
+    -fx-background-radius: 3 12 12 3;
+    -fx-border-color: transparent transparent transparent #e11d48;
+    -fx-border-radius: 3 12 12 3;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #9f1239;
+}
+
+.input-bar {
+    -fx-alignment: center;
+}
+
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-padding: 10 12 10 12;
+}
+
+.text-field:focused {
+    -fx-border-color: #047857;
+}
+
+.button {
+    -fx-background-color: #047857;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-padding: 10 18 10 18;
+    -fx-text-fill: white;
+}
+
+.button:hover {
+    -fx-background-color: #065f46;
+}
