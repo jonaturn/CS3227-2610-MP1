@@ -15,11 +15,11 @@ import staniz.task.Todo;
  */
 public final class Parser {
     private static final String DEADLINE_SEPARATOR = " /by";
-    private static final String EMPTY_INPUT_MESSAGE = "OOPS! Please enter a command.";
+    private static final String EMPTY_INPUT_MESSAGE = "Form check: enter a command.";
     private static final String EXAMPLE_DATE = "2019-12-02";
     private static final String EVENT_FROM_SEPARATOR = " /from";
     private static final String EVENT_TO_SEPARATOR = " /to";
-    private static final String UNKNOWN_COMMAND_MESSAGE = "OOPS! I don't recognize that command. "
+    private static final String UNKNOWN_COMMAND_MESSAGE = "Form check: I don't recognize that command. "
             + "Try todo, deadline, event, list, find, mark, unmark, delete, or bye.";
 
     private Parser() {
@@ -55,7 +55,7 @@ public final class Parser {
     public static Todo parseTodo(String input) throws StanizException {
         String description = getCommandArgument(input, CommandType.TODO);
         if (description.isBlank()) {
-            throw new StanizException("OOPS! A todo needs a description. Try: todo borrow book");
+            throw new StanizException("Form check: a todo needs a description. Try: todo borrow book");
         }
         return new Todo(description);
     }
@@ -70,7 +70,7 @@ public final class Parser {
     public static String parseFindKeyword(String input) throws StanizException {
         String keyword = getCommandArgument(input, CommandType.FIND).strip();
         if (keyword.isBlank()) {
-            throw new StanizException("OOPS! 'find' needs a keyword. Try: find book");
+            throw new StanizException("Form check: 'find' needs a keyword. Try: find book");
         }
         return keyword;
     }
@@ -86,16 +86,16 @@ public final class Parser {
         String arguments = getCommandArgument(input, CommandType.DEADLINE);
         int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
         if (separatorIndex < 0) {
-            throw new StanizException("OOPS! A deadline needs '/by'. "
+            throw new StanizException("Form check: a deadline needs '/by'. "
                     + "Try: deadline return book /by " + EXAMPLE_DATE);
         }
         String description = arguments.substring(0, separatorIndex);
         String byText = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length()).strip();
         if (description.isBlank()) {
-            throw new StanizException("OOPS! A deadline needs a description before '/by'.");
+            throw new StanizException("Form check: a deadline needs a description before '/by'.");
         }
         if (byText.isBlank()) {
-            throw new StanizException("OOPS! A deadline needs a due time after '/by'.");
+            throw new StanizException("Form check: a deadline needs a due time after '/by'.");
         }
         LocalDate by = parseDate(byText, "deadline date");
         return new Deadline(description, by);
@@ -112,13 +112,13 @@ public final class Parser {
         String arguments = getCommandArgument(input, CommandType.EVENT);
         int fromSeparatorIndex = arguments.indexOf(EVENT_FROM_SEPARATOR);
         if (fromSeparatorIndex < 0) {
-            throw new StanizException("OOPS! An event needs '/from' and '/to'. "
+            throw new StanizException("Form check: an event needs '/from' and '/to'. "
                     + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
         int toSeparatorIndex = arguments.indexOf(EVENT_TO_SEPARATOR, fromSeparatorIndex
                 + EVENT_FROM_SEPARATOR.length());
         if (toSeparatorIndex < 0) {
-            throw new StanizException("OOPS! An event needs an end time after '/to'. "
+            throw new StanizException("Form check: an event needs an end time after '/to'. "
                     + "Try: event meeting /from " + EXAMPLE_DATE + " /to 2019-12-03");
         }
         String description = arguments.substring(0, fromSeparatorIndex);
@@ -126,18 +126,18 @@ public final class Parser {
                 .strip();
         String toText = arguments.substring(toSeparatorIndex + EVENT_TO_SEPARATOR.length()).strip();
         if (description.isBlank()) {
-            throw new StanizException("OOPS! An event needs a description before '/from'.");
+            throw new StanizException("Form check: an event needs a description before '/from'.");
         }
         if (fromText.isBlank()) {
-            throw new StanizException("OOPS! An event needs a start time after '/from'.");
+            throw new StanizException("Form check: an event needs a start time after '/from'.");
         }
         if (toText.isBlank()) {
-            throw new StanizException("OOPS! An event needs an end time after '/to'.");
+            throw new StanizException("Form check: an event needs an end time after '/to'.");
         }
         LocalDate from = parseDate(fromText, "event start date");
         LocalDate to = parseDate(toText, "event end date");
         if (from.isAfter(to)) {
-            throw new StanizException("OOPS! The event start date cannot be after the end date.");
+            throw new StanizException("Form check: the event start date cannot be after the end date.");
         }
         return new Event(description, from, to);
     }
@@ -162,19 +162,20 @@ public final class Parser {
         String command = commandType.getKeyword();
         String taskNumberText = getCommandArgument(input, commandType);
         if (taskNumberText.isBlank()) {
-            throw new StanizException("OOPS! '" + command + "' needs a task number. Try: " + command + " 1");
+            throw new StanizException("Form check: '" + command
+                    + "' needs a task number. Try: " + command + " 1");
         }
 
         int taskNumber;
         try {
             taskNumber = Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
-            throw new StanizException("OOPS! The task number must be a whole number.");
+            throw new StanizException("Form check: the task number must be a whole number.");
         }
 
         if (taskNumber < 1 || taskNumber > taskCount) {
-            throw new StanizException("OOPS! There is no task numbered " + taskNumber
-                    + ". Your list currently has " + taskCount + " task(s).");
+            throw new StanizException("Form check: there is no task numbered " + taskNumber
+                    + ". Your training plan currently has " + taskCount + " task(s).");
         }
         return taskNumber - 1;
     }
@@ -191,7 +192,7 @@ public final class Parser {
         try {
             return DateParser.parse(dateText);
         } catch (DateTimeParseException exception) {
-            throw new StanizException("OOPS! The " + fieldName
+            throw new StanizException("Form check: the " + fieldName
                     + " must use yyyy-MM-dd, e.g. " + EXAMPLE_DATE + ".");
         }
     }

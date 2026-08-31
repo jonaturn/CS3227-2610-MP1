@@ -20,10 +20,10 @@ class ResponseFormatterTest {
     void greetingAndFarewell_returnConversationalMessages() {
         assertAll(
                 () -> assertTrue(ResponseFormatter.getWelcomeMessage()
-                        .contains("Hello! I'm Staniz")),
-                () -> assertEquals("Hello! I'm Staniz\nWhat can I do for you?",
+                        .contains("Staniz here. Let's get your tasks into fighting shape.")),
+                () -> assertEquals("Staniz here. Let's get your tasks into fighting shape.",
                         ResponseFormatter.getGreetingMessage()),
-                () -> assertEquals("Bye. Hope to see you again soon!",
+                () -> assertEquals("Session complete. Stay disciplined.",
                         ResponseFormatter.getFarewellMessage()));
     }
 
@@ -32,16 +32,17 @@ class ResponseFormatterTest {
         Todo task = new Todo("borrow book");
 
         assertAll(
-                () -> assertEquals("added: [T][ ] borrow book",
+                () -> assertEquals("Good. Another objective locked in:"
+                                + System.lineSeparator() + "  [T][ ] borrow book",
                         ResponseFormatter.formatTaskAdded(task)),
                 () -> assertTrue(ResponseFormatter.formatTaskMarked(task)
                         .contains("[T][ ] borrow book")),
                 () -> assertTrue(ResponseFormatter.formatTaskUnmarked(task)
                         .contains("[T][ ] borrow book")),
                 () -> assertTrue(ResponseFormatter.formatTaskDeleted(task, 1)
-                        .contains("Now you have 1 task in the list.")),
+                        .contains("You have 1 objective left in the program.")),
                 () -> assertTrue(ResponseFormatter.formatTaskDeleted(task, 2)
-                        .contains("Now you have 2 tasks in the list.")));
+                        .contains("You have 2 objectives left in the program.")));
     }
 
     @Test
@@ -54,10 +55,9 @@ class ResponseFormatterTest {
         String matchingTasks = ResponseFormatter.formatMatchingTasks(tasks);
 
         assertAll(
-                () -> assertTrue(storedTasks.startsWith("Here are the tasks in your list:")),
+                () -> assertTrue(storedTasks.startsWith("Current training plan:")),
                 () -> assertTrue(storedTasks.contains("1.[T][ ] first")),
                 () -> assertTrue(storedTasks.contains("2.[T][ ] second")),
-                () -> assertTrue(matchingTasks.startsWith(
-                        "Here are the matching tasks in your list:")));
+                () -> assertTrue(matchingTasks.startsWith("Matching objectives:")));
     }
 }

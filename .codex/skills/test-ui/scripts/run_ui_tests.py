@@ -80,8 +80,12 @@ def require_java_25(java_executable: str) -> None:
 
 
 def compile_sources(javac_executable: str, source_dir: Path, classes_dir: Path) -> None:
-    """Compile every Java source file into the temporary classes directory."""
-    sources = sorted(source_dir.rglob("*.java"))
+    """Compile command-line sources without the Gradle-managed JavaFX package."""
+    sources = sorted(
+        source
+        for source in source_dir.rglob("*.java")
+        if source.relative_to(source_dir).parts[:2] != ("staniz", "gui")
+    )
     if not sources:
         raise RuntimeError(f"No Java sources found in {source_dir.resolve()}")
 

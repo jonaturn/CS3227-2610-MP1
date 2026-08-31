@@ -5,7 +5,7 @@ description: Compile and test the Staniz command-line UI using command lists and
 
 # Test the Staniz UI
 
-Use `scripts/run_test_plan.py` to run the complete documented UI suite. It compiles all Java sources once in a temporary directory, requires Java 25, executes each case from `test/ui-test-plan.md`, checks expected output fragments in order, and prints every input/output transcript. On Windows, the project wrapper handles Python discovery and is the simplest user-facing command:
+Use `scripts/run_test_plan.py` to run the complete documented UI suite. It compiles the command-line Java sources once in a temporary directory (the Gradle-managed `staniz.gui` JavaFX package is excluded), requires Java 25, executes each case from `test/ui-test-plan.md`, checks expected output fragments in order, and prints every input/output transcript. On Windows, the project wrapper handles Python discovery and is the simplest user-facing command:
 
 ```powershell
 .\test\run-tests.ps1

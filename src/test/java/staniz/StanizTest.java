@@ -35,11 +35,13 @@ class StanizTest {
         CommandResult exitResult = staniz.executeCommand("bye");
 
         assertAll(
-                () -> assertEquals("added: [T][ ] test backend", addedResult.getResponse()),
+                () -> assertEquals("Good. Another objective locked in:"
+                                + System.lineSeparator() + "  [T][ ] test backend",
+                        addedResult.getResponse()),
                 () -> assertFalse(addedResult.shouldExit()),
                 () -> assertTrue(listResult.getResponse().contains("1.[T][ ] test backend")),
                 () -> assertFalse(listResult.shouldExit()),
-                () -> assertEquals("Bye. Hope to see you again soon!",
+                () -> assertEquals("Session complete. Stay disciplined.",
                         exitResult.getResponse()),
                 () -> assertTrue(exitResult.shouldExit()),
                 () -> assertEquals("T | 0 | test backend",
@@ -71,10 +73,12 @@ class StanizTest {
             String output = new String(process.getInputStream().readAllBytes(), UTF_8);
             assertAll(
                     () -> assertEquals(0, process.exitValue()),
-                    () -> assertTrue(output.contains("Hello! I'm Staniz")),
-                    () -> assertTrue(output.contains("added: [T][ ] test gradle")),
+                    () -> assertTrue(output.contains(
+                            "Staniz here. Let's get your tasks into fighting shape.")),
+                    () -> assertTrue(output.contains("Good. Another objective locked in:")),
+                    () -> assertTrue(output.contains("  [T][ ] test gradle")),
                     () -> assertTrue(output.contains("1.[T][ ] test gradle")),
-                    () -> assertTrue(output.contains("Bye. Hope to see you again soon!")),
+                    () -> assertTrue(output.contains("Session complete. Stay disciplined.")),
                     () -> assertEquals("T | 0 | test gradle",
                             java.nio.file.Files.readString(
                                     temporaryDirectory.resolve("data/staniz.txt"), UTF_8).strip()));

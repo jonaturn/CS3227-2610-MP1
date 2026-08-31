@@ -78,9 +78,9 @@ class UiTest {
 
         assertAll(
                 () -> assertTrue(getOutput().contains("____ _____  _    _   _ ___ _____")),
-                () -> assertTrue(getOutput().contains("Hello! I'm Staniz")),
-                () -> assertTrue(getOutput().contains("What can I do for you?")),
-                () -> assertTrue(getOutput().contains("Bye. Hope to see you again soon!")));
+                () -> assertTrue(getOutput().contains(
+                        "Staniz here. Let's get your tasks into fighting shape.")),
+                () -> assertTrue(getOutput().contains("Session complete. Stay disciplined.")));
     }
 
     @Test
@@ -94,7 +94,7 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(getOutput().contains("Here are the tasks in your list:")),
+                () -> assertTrue(getOutput().contains("Current training plan:")),
                 () -> assertTrue(getOutput().contains("1.[T][ ] first")),
                 () -> assertTrue(getOutput().contains("2.[D][ ] second (by: Sep 02 2026)")));
     }
@@ -110,7 +110,7 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(getOutput().contains("Here are the matching tasks in your list:")),
+                () -> assertTrue(getOutput().contains("Matching objectives:")),
                 () -> assertTrue(getOutput().contains("1.[T][ ] read book")),
                 () -> assertTrue(getOutput().contains("2.[D][ ] return book (by: Sep 02 2026)")));
     }
@@ -129,15 +129,19 @@ class UiTest {
         }
 
         assertAll(
-                () -> assertTrue(getOutput().contains("added: [T][ ] read book")),
                 () -> assertTrue(getOutput().contains(
-                        "Nice! I've marked this task as done:" + System.lineSeparator()
+                        "Good. Another objective locked in:" + System.lineSeparator()
+                                + "  [T][ ] read book")),
+                () -> assertTrue(getOutput().contains(
+                        "Strong work. One more task conquered:" + System.lineSeparator()
                                 + "  [T][X] read book")),
                 () -> assertTrue(getOutput().contains(
-                        "OK, I've marked this task as not done yet:" + System.lineSeparator()
+                        "Reset accepted. This objective is active again:" + System.lineSeparator()
                                 + "  [T][ ] read book")),
-                () -> assertTrue(getOutput().contains("Now you have 1 task in the list.")),
-                () -> assertTrue(getOutput().contains("Now you have 2 tasks in the list.")));
+                () -> assertTrue(getOutput().contains(
+                        "You have 1 objective left in the program.")),
+                () -> assertTrue(getOutput().contains(
+                        "You have 2 objectives left in the program.")));
     }
 
     private Ui createUi(String input) {

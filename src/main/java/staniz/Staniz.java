@@ -52,7 +52,7 @@ public class Staniz {
             try {
                 staniz = new Staniz();
             } catch (StorageException exception) {
-                ui.showResponse("OOPS! " + exception.getMessage());
+                ui.showResponse("System check: " + exception.getMessage());
                 return;
             }
 

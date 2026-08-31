@@ -35,9 +35,9 @@ class ParserTest {
     void parseCommandType_blankAndUnknownInputExplainsTheProblem() {
         assertAll(
                 () -> assertParsingError(() -> Parser.parseCommandType("   "),
-                        "OOPS! Please enter a command."),
+                        "Form check: enter a command."),
                 () -> assertParsingError(() -> Parser.parseCommandType("dance"),
-                        "OOPS! I don't recognize that command. "
+                        "Form check: I don't recognize that command. "
                                 + "Try todo, deadline, event, list, find, mark, unmark, delete, or bye."));
     }
 
@@ -49,7 +49,7 @@ class ParserTest {
     @Test
     void parseTodo_missingDescriptionIsRejected() {
         assertParsingError(() -> Parser.parseTodo("todo"),
-                "OOPS! A todo needs a description. Try: todo borrow book");
+                "Form check: a todo needs a description. Try: todo borrow book");
     }
 
     @Test
@@ -61,9 +61,9 @@ class ParserTest {
     void parseFindKeyword_missingKeywordIsRejected() {
         assertAll(
                 () -> assertParsingError(() -> Parser.parseFindKeyword("find"),
-                        "OOPS! 'find' needs a keyword. Try: find book"),
+                        "Form check: 'find' needs a keyword. Try: find book"),
                 () -> assertParsingError(() -> Parser.parseFindKeyword("find   "),
-                        "OOPS! 'find' needs a keyword. Try: find book"));
+                        "Form check: 'find' needs a keyword. Try: find book"));
     }
 
     @Test
@@ -76,13 +76,14 @@ class ParserTest {
     void parseDeadline_missingFieldsAndInvalidDatesAreRejected() {
         assertAll(
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline return book"),
-                        "OOPS! A deadline needs '/by'. Try: deadline return book /by 2019-12-02"),
+                        "Form check: a deadline needs '/by'. "
+                                + "Try: deadline return book /by 2019-12-02"),
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline  /by 2026-09-01"),
-                        "OOPS! A deadline needs a description before '/by'."),
+                        "Form check: a deadline needs a description before '/by'."),
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline return book /by"),
-                        "OOPS! A deadline needs a due time after '/by'."),
+                        "Form check: a deadline needs a due time after '/by'."),
                 () -> assertParsingError(() -> Parser.parseDeadline("deadline return /by 2026-02-30"),
-                        "OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02."));
+                        "Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02."));
     }
 
     @Test
@@ -100,26 +101,26 @@ class ParserTest {
     void parseEvent_missingFieldsInvalidDatesAndReversedRangeAreRejected() {
         assertAll(
                 () -> assertParsingError(() -> Parser.parseEvent("event meeting"),
-                        "OOPS! An event needs '/from' and '/to'. "
+                        "Form check: an event needs '/from' and '/to'. "
                                 + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
                 () -> assertParsingError(() -> Parser.parseEvent("event meeting /from 2026-09-01"),
-                        "OOPS! An event needs an end time after '/to'. "
+                        "Form check: an event needs an end time after '/to'. "
                                 + "Try: event meeting /from 2019-12-02 /to 2019-12-03"),
                 () -> assertParsingError(() -> Parser.parseEvent("event  /from 2026-09-01 /to 2026-09-02"),
-                        "OOPS! An event needs a description before '/from'."),
+                        "Form check: an event needs a description before '/from'."),
                 () -> assertParsingError(() -> Parser.parseEvent("event meeting /from /to 2026-09-02"),
-                        "OOPS! An event needs a start time after '/from'."),
+                        "Form check: an event needs a start time after '/from'."),
                 () -> assertParsingError(() -> Parser.parseEvent("event meeting /from 2026-09-01 /to"),
-                        "OOPS! An event needs an end time after '/to'."),
+                        "Form check: an event needs an end time after '/to'."),
                 () -> assertParsingError(
                         () -> Parser.parseEvent("event meeting /from 2026-02-30 /to 2026-09-02"),
-                        "OOPS! The event start date must use yyyy-MM-dd, e.g. 2019-12-02."),
+                        "Form check: the event start date must use yyyy-MM-dd, e.g. 2019-12-02."),
                 () -> assertParsingError(
                         () -> Parser.parseEvent("event meeting /from 2026-09-01 /to next week"),
-                        "OOPS! The event end date must use yyyy-MM-dd, e.g. 2019-12-02."),
+                        "Form check: the event end date must use yyyy-MM-dd, e.g. 2019-12-02."),
                 () -> assertParsingError(
                         () -> Parser.parseEvent("event meeting /from 2026-09-03 /to 2026-09-02"),
-                        "OOPS! The event start date cannot be after the end date."));
+                        "Form check: the event start date cannot be after the end date."));
     }
 
     @Test
@@ -133,13 +134,15 @@ class ParserTest {
     void parseTaskIndex_missingMalformedAndOutOfRangeNumbersAreRejected() {
         assertAll(
                 () -> assertParsingError(() -> Parser.parseTaskIndex("mark", CommandType.MARK, 2),
-                        "OOPS! 'mark' needs a task number. Try: mark 1"),
+                        "Form check: 'mark' needs a task number. Try: mark 1"),
                 () -> assertParsingError(() -> Parser.parseTaskIndex("delete one", CommandType.DELETE, 2),
-                        "OOPS! The task number must be a whole number."),
+                        "Form check: the task number must be a whole number."),
                 () -> assertParsingError(() -> Parser.parseTaskIndex("unmark 0", CommandType.UNMARK, 2),
-                        "OOPS! There is no task numbered 0. Your list currently has 2 task(s)."),
+                        "Form check: there is no task numbered 0. "
+                                + "Your training plan currently has 2 task(s)."),
                 () -> assertParsingError(() -> Parser.parseTaskIndex("mark 3", CommandType.MARK, 2),
-                        "OOPS! There is no task numbered 3. Your list currently has 2 task(s)."));
+                        "Form check: there is no task numbered 3. "
+                                + "Your training plan currently has 2 task(s)."));
     }
 
     @Test

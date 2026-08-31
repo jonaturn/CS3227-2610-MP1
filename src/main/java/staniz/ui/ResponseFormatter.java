@@ -7,20 +7,19 @@ import staniz.task.TaskList;
  * Formats Staniz responses independently of a particular user interface.
  */
 public final class ResponseFormatter {
-    private static final String ADDED_MESSAGE_PREFIX = "added: ";
+    private static final String ADDED_MESSAGE = "Good. Another objective locked in:";
     private static final String BANNER = " ____ _____  _    _   _ ___ _____\n"
             + "/ ___|_   _|/ \\  | \\ | |_ _|__  /\n"
             + "\\___ \\ | | / _ \\ |  \\| || |  / /\n"
             + " ___) || |/ ___ \\| |\\  || | / /_\n"
             + "|____/ |_/_/   \\_\\_| \\_|___/____|";
-    private static final String DELETED_MESSAGE = "Noted. I've removed this task:";
-    private static final String FAREWELL = "Bye. Hope to see you again soon!";
-    private static final String GREETING = "Hello! I'm Staniz\n"
-            + "What can I do for you?";
-    private static final String MARKED_MESSAGE = "Nice! I've marked this task as done:";
-    private static final String MATCHING_TASKS_HEADER = "Here are the matching tasks in your list:";
-    private static final String TASK_LIST_HEADER = "Here are the tasks in your list:";
-    private static final String UNMARKED_MESSAGE = "OK, I've marked this task as not done yet:";
+    private static final String DELETED_MESSAGE = "Cutting dead weight. This task is gone:";
+    private static final String FAREWELL = "Session complete. Stay disciplined.";
+    private static final String GREETING = "Staniz here. Let's get your tasks into fighting shape.";
+    private static final String MARKED_MESSAGE = "Strong work. One more task conquered:";
+    private static final String MATCHING_TASKS_HEADER = "Matching objectives:";
+    private static final String TASK_LIST_HEADER = "Current training plan:";
+    private static final String UNMARKED_MESSAGE = "Reset accepted. This objective is active again:";
 
     private ResponseFormatter() {
         // Utility class; prevent instantiation.
@@ -60,7 +59,7 @@ public final class ResponseFormatter {
      * @return addition confirmation.
      */
     public static String formatTaskAdded(Task task) {
-        return ADDED_MESSAGE_PREFIX + task;
+        return ADDED_MESSAGE + System.lineSeparator() + "  " + task;
     }
 
     /**
@@ -91,10 +90,10 @@ public final class ResponseFormatter {
      * @return deletion confirmation and remaining count.
      */
     public static String formatTaskDeleted(Task task, int remainingTaskCount) {
-        String taskLabel = remainingTaskCount == 1 ? "task" : "tasks";
+        String objectiveLabel = remainingTaskCount == 1 ? "objective" : "objectives";
         return DELETED_MESSAGE + System.lineSeparator()
                 + "  " + task + System.lineSeparator()
-                + "Now you have " + remainingTaskCount + " " + taskLabel + " in the list.";
+                + "You have " + remainingTaskCount + " " + objectiveLabel + " left in the program.";
     }
 
     /**

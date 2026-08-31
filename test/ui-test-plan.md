@@ -20,13 +20,16 @@ bye
 Expected output:
 
 ```text
-added: [T][ ] borrow book
-added: [D][ ] return book (by: Dec 02 2019)
-added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+Good. Another objective locked in:
+  [T][ ] borrow book
+Good. Another objective locked in:
+  [D][ ] return book (by: Dec 02 2019)
+Good. Another objective locked in:
+  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[T][ ] borrow book
 2.[D][ ] return book (by: Dec 02 2019)
 3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-Bye. Hope to see you again soon!
+Session complete. Stay disciplined.
 ```
 
 ## Case 2: Mark each task type
@@ -49,11 +52,11 @@ bye
 Expected output:
 
 ```text
-Nice! I've marked this task as done:
+Strong work. One more task conquered:
   [T][X] borrow book
-Nice! I've marked this task as done:
+Strong work. One more task conquered:
   [D][X] return book (by: Dec 02 2019)
-Nice! I've marked this task as done:
+Strong work. One more task conquered:
   [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[T][X] borrow book
 2.[D][X] return book (by: Dec 02 2019)
@@ -78,7 +81,7 @@ Expected output:
 
 ```text
   [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-OK, I've marked this task as not done yet:
+Reset accepted. This objective is active again:
   [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
@@ -101,10 +104,11 @@ bye
 Expected output:
 
 ```text
-OOPS! Please enter a command.
-OOPS! A todo needs a description. Try: todo borrow book
-added: [T][ ] borrow book
-OOPS! I don't recognize that command. Try todo, deadline, event, list, find, mark, unmark, delete, or bye.
+Form check: enter a command.
+Form check: a todo needs a description. Try: todo borrow book
+Good. Another objective locked in:
+  [T][ ] borrow book
+Form check: I don't recognize that command. Try todo, deadline, event, list, find, mark, unmark, delete, or bye.
 1.[T][ ] borrow book
 ```
 
@@ -132,16 +136,18 @@ bye
 Expected output:
 
 ```text
-OOPS! A deadline needs '/by'. Try: deadline return book /by 2019-12-02
-OOPS! A deadline needs a description before '/by'.
-OOPS! A deadline needs a due time after '/by'.
-added: [D][ ] return book (by: Dec 02 2019)
-OOPS! An event needs '/from' and '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
-OOPS! An event needs an end time after '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
-OOPS! An event needs a description before '/from'.
-OOPS! An event needs a start time after '/from'.
-OOPS! An event needs an end time after '/to'.
-added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+Form check: a deadline needs '/by'. Try: deadline return book /by 2019-12-02
+Form check: a deadline needs a description before '/by'.
+Form check: a deadline needs a due time after '/by'.
+Good. Another objective locked in:
+  [D][ ] return book (by: Dec 02 2019)
+Form check: an event needs '/from' and '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
+Form check: an event needs an end time after '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
+Form check: an event needs a description before '/from'.
+Form check: an event needs a start time after '/from'.
+Form check: an event needs an end time after '/to'.
+Good. Another objective locked in:
+  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 1.[D][ ] return book (by: Dec 02 2019)
 2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
@@ -169,14 +175,15 @@ bye
 Expected output:
 
 ```text
-added: [T][ ] borrow book
-OOPS! 'mark' needs a task number. Try: mark 1
-OOPS! The task number must be a whole number.
-OOPS! There is no task numbered 0. Your list currently has 1 task(s).
-OOPS! There is no task numbered 2. Your list currently has 1 task(s).
-OOPS! There is no task numbered -1. Your list currently has 1 task(s).
+Good. Another objective locked in:
+  [T][ ] borrow book
+Form check: 'mark' needs a task number. Try: mark 1
+Form check: the task number must be a whole number.
+Form check: there is no task numbered 0. Your training plan currently has 1 task(s).
+Form check: there is no task numbered 2. Your training plan currently has 1 task(s).
+Form check: there is no task numbered -1. Your training plan currently has 1 task(s).
   [T][X] borrow book
-OOPS! 'unmark' needs a task number. Try: unmark 1
+Form check: 'unmark' needs a task number. Try: unmark 1
   [T][ ] borrow book
 1.[T][ ] borrow book
 ```
@@ -202,18 +209,18 @@ bye
 Expected output:
 
 ```text
-Noted. I've removed this task:
+Cutting dead weight. This task is gone:
   [D][ ] middle task (by: Dec 02 2019)
-Now you have 2 tasks in the list.
+You have 2 objectives left in the program.
 1.[T][ ] first task
 2.[E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
-Noted. I've removed this task:
+Cutting dead weight. This task is gone:
   [E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
-Now you have 1 task in the list.
-Noted. I've removed this task:
+You have 1 objective left in the program.
+Cutting dead weight. This task is gone:
   [T][ ] first task
-Now you have 0 tasks in the list.
-Here are the tasks in your list:
+You have 0 objectives left in the program.
+Current training plan:
 ```
 
 ## Case 8: Reject invalid delete task numbers
@@ -235,11 +242,12 @@ bye
 Expected output:
 
 ```text
-added: [T][ ] borrow book
-OOPS! 'delete' needs a task number. Try: delete 1
-OOPS! The task number must be a whole number.
-OOPS! There is no task numbered 0. Your list currently has 1 task(s).
-OOPS! There is no task numbered 2. Your list currently has 1 task(s).
+Good. Another objective locked in:
+  [T][ ] borrow book
+Form check: 'delete' needs a task number. Try: delete 1
+Form check: the task number must be a whole number.
+Form check: there is no task numbered 0. Your training plan currently has 1 task(s).
+Form check: there is no task numbered 2. Your training plan currently has 1 task(s).
 1.[T][ ] borrow book
 ```
 
@@ -263,9 +271,12 @@ bye
 Expected output:
 
 ```text
-added: [T][ ] read C:\docs | notes
-added: [D][ ] return book (by: Dec 02 2019)
-added: [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
+Good. Another objective locked in:
+  [T][ ] read C:\docs | notes
+Good. Another objective locked in:
+  [D][ ] return book (by: Dec 02 2019)
+Good. Another objective locked in:
+  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
   [D][X] return book (by: Dec 02 2019)
 1.[T][ ] read C:\docs | notes
 2.[D][X] return book (by: Dec 02 2019)
@@ -299,7 +310,7 @@ Expected output:
   [D][X] return book (by: Dec 02 2019)
   [D][ ] return book (by: Dec 02 2019)
   [T][ ] borrow book
-Now you have 2 tasks in the list.
+You have 2 objectives left in the program.
 1.[D][ ] return book (by: Dec 02 2019)
 2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
 ```
@@ -325,13 +336,15 @@ bye
 Expected output:
 
 ```text
-added: [D][ ] leap day (by: Feb 29 2024)
-OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
-OOPS! The deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
-OOPS! The event start date must use yyyy-MM-dd, e.g. 2019-12-02.
-OOPS! The event end date must use yyyy-MM-dd, e.g. 2019-12-02.
-OOPS! The event start date cannot be after the end date.
-added: [E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
+Good. Another objective locked in:
+  [D][ ] leap day (by: Feb 29 2024)
+Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
+Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
+Form check: the event start date must use yyyy-MM-dd, e.g. 2019-12-02.
+Form check: the event end date must use yyyy-MM-dd, e.g. 2019-12-02.
+Form check: the event start date cannot be after the end date.
+Good. Another objective locked in:
+  [E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
 1.[D][ ] leap day (by: Feb 29 2024)
 2.[E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
 ```
@@ -356,17 +369,20 @@ bye
 Expected output:
 
 ```text
-added: [T][ ] read book
-added: [D][ ] return book (by: Dec 02 2019)
-added: [T][ ] buy groceries
-Here are the matching tasks in your list:
+Good. Another objective locked in:
+  [T][ ] read book
+Good. Another objective locked in:
+  [D][ ] return book (by: Dec 02 2019)
+Good. Another objective locked in:
+  [T][ ] buy groceries
+Matching objectives:
 1.[T][ ] read book
 2.[D][ ] return book (by: Dec 02 2019)
-OOPS! 'find' needs a keyword. Try: find book
-Here are the matching tasks in your list:
-Here are the tasks in your list:
+Form check: 'find' needs a keyword. Try: find book
+Matching objectives:
+Current training plan:
 1.[T][ ] read book
 2.[D][ ] return book (by: Dec 02 2019)
 3.[T][ ] buy groceries
-Bye. Hope to see you again soon!
+Session complete. Stay disciplined.
 ```
