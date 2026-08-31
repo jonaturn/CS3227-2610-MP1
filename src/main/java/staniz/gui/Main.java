@@ -25,15 +25,6 @@ public class Main extends Application {
     }
 
     /**
-     * Passes command-line arguments to the JavaFX runtime.
-     *
-     * @param args command-line arguments passed to JavaFX.
-     */
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    /**
      * Loads the FXML view and connects it to the Staniz backend.
      *
      * @param stage primary application window.
