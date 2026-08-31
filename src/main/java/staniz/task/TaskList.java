@@ -27,6 +27,9 @@ public class TaskList {
      * @param tasks initial tasks.
      */
     public TaskList(List<Task> tasks) {
+        assert tasks != null : "Initial task collection must not be null";
+        assert tasks.stream().noneMatch(task -> task == null)
+                : "Initial task collection must not contain null tasks";
         this.tasks = new ArrayList<>(tasks);
     }
 
@@ -36,6 +39,7 @@ public class TaskList {
      * @param task task to add.
      */
     public void add(Task task) {
+        assert task != null : "Task list must not contain null tasks";
         tasks.add(task);
     }
 
@@ -46,6 +50,7 @@ public class TaskList {
      * @return task at the index.
      */
     public Task get(int index) {
+        assertIndexIsValid(index);
         return tasks.get(index);
     }
 
@@ -80,6 +85,7 @@ public class TaskList {
      * @return removed task.
      */
     public Task delete(int index) {
+        assertIndexIsValid(index);
         return tasks.remove(index);
     }
 
@@ -116,5 +122,15 @@ public class TaskList {
      */
     public List<Task> getTasks() {
         return List.copyOf(tasks);
+    }
+
+    /**
+     * Verifies the internal precondition shared by indexed task operations.
+     *
+     * @param index zero-based task index supplied by a validated command.
+     */
+    private void assertIndexIsValid(int index) {
+        assert index >= 0 && index < tasks.size()
+                : "Task index must be within the current list bounds";
     }
 }

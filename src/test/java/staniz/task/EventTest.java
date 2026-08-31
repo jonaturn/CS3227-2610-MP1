@@ -2,6 +2,7 @@ package staniz.task;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 
@@ -23,5 +24,18 @@ class EventTest {
                 () -> assertEquals(
                         "[E][ ] conference (from: Sep 02 2026 to: Sep 04 2026)",
                         event.toString()));
+    }
+
+    @Test
+    void constructor_withInvalidInternalDatesFailsAssertions() {
+        LocalDate date = LocalDate.of(2026, 9, 2);
+
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> new Event("missing start", null, date)),
+                () -> assertThrows(AssertionError.class,
+                        () -> new Event("missing end", date, null)),
+                () -> assertThrows(AssertionError.class,
+                        () -> new Event("reversed", date.plusDays(1), date)));
     }
 }

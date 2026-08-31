@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,18 @@ class TaskListTest {
                 () -> assertEquals(2, taskList.getTaskCount()),
                 () -> assertSame(first, taskList.get(0)),
                 () -> assertSame(second, taskList.get(1)));
+    }
+
+    @Test
+    void methods_withInvalidInternalTasksAndIndexesFailAssertions() {
+        TaskList taskList = new TaskList(new Todo("only task"));
+
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> new TaskList(Collections.singletonList(null))),
+                () -> assertThrows(AssertionError.class, () -> taskList.add(null)),
+                () -> assertThrows(AssertionError.class, () -> taskList.get(-1)),
+                () -> assertThrows(AssertionError.class, () -> taskList.delete(1)));
     }
 
     @Test

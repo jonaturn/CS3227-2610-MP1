@@ -14,6 +14,7 @@ public final class CommandResult {
      * @param shouldExit whether the application should close after displaying the response.
      */
     public CommandResult(String response, boolean shouldExit) {
+        assert response != null : "A command result must contain response text";
         this.response = response;
         this.shouldExit = shouldExit;
     }

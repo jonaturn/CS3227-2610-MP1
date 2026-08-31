@@ -153,6 +153,12 @@ public final class Parser {
      */
     public static int parseTaskIndex(String input, CommandType commandType, int taskCount)
             throws StanizException {
+        assert commandType == CommandType.MARK
+                || commandType == CommandType.UNMARK
+                || commandType == CommandType.DELETE
+                : "Task indexes are parsed only for mark, unmark, and delete commands";
+        assert taskCount >= 0 : "Task count cannot be negative";
+
         String command = commandType.getKeyword();
         String taskNumberText = getCommandArgument(input, commandType);
         if (taskNumberText.isBlank()) {

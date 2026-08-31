@@ -3,6 +3,7 @@ package staniz.task;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -42,5 +43,12 @@ class TaskTest {
                 () -> assertTrue(task.hasDescriptionContaining("library")),
                 () -> assertTrue(task.hasDescriptionContaining("book")),
                 () -> assertFalse(task.hasDescriptionContaining("Library")));
+    }
+
+    @Test
+    void constructor_withInvalidInternalDescriptionFailsAssertions() {
+        assertAll(
+                () -> assertThrows(AssertionError.class, () -> new Todo(null)),
+                () -> assertThrows(AssertionError.class, () -> new Todo("   ")));
     }
 }

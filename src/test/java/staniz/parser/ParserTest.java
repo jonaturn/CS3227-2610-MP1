@@ -142,6 +142,15 @@ class ParserTest {
                         "OOPS! There is no task numbered 3. Your list currently has 2 task(s)."));
     }
 
+    @Test
+    void parseTaskIndex_withInvalidInternalArgumentsFailsAssertions() {
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> Parser.parseTaskIndex("list", CommandType.LIST, 2)),
+                () -> assertThrows(AssertionError.class,
+                        () -> Parser.parseTaskIndex("mark 1", CommandType.MARK, -1)));
+    }
+
     private static void assertParsingError(Executable action, String expectedMessage) {
         StanizException exception = assertThrows(StanizException.class, action);
         assertEquals(expectedMessage, exception.getMessage());
