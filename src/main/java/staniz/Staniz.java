@@ -1,5 +1,6 @@
 package staniz;
 
+import staniz.command.CommandResult;
 import staniz.command.CommandType;
 import staniz.exception.StanizException;
 import staniz.exception.StorageException;
@@ -7,15 +8,35 @@ import staniz.parser.Parser;
 import staniz.storage.Storage;
 import staniz.task.Task;
 import staniz.task.TaskList;
+import staniz.ui.ResponseFormatter;
 import staniz.ui.Ui;
 
 /**
  * Runs the Staniz personal assistant chatbot.
  */
 public class Staniz {
+    private final Storage storage;
+    private final TaskList tasks;
 
-    private Staniz() {
-        // Application entry point; prevent instantiation.
+    /**
+     * Creates a Staniz backend using the default persistent data file.
+     *
+     * @throws StorageException if existing tasks cannot be loaded.
+     */
+    public Staniz() throws StorageException {
+        this(new Storage());
+    }
+
+    /**
+     * Creates a Staniz backend using caller-provided storage.
+     * This constructor keeps tests isolated from the user's real data file.
+     *
+     * @param storage persistence source and destination.
+     * @throws StorageException if existing tasks cannot be loaded.
+     */
+    Staniz(Storage storage) throws StorageException {
+        this.storage = storage;
+        tasks = new TaskList(storage.load());
     }
 
     /**
@@ -27,19 +48,22 @@ public class Staniz {
         try (Ui ui = new Ui()) {
             ui.showWelcome();
 
-            Storage storage = new Storage();
-            TaskList tasks;
+            Staniz staniz;
             try {
-                tasks = new TaskList(storage.load());
+                staniz = new Staniz();
             } catch (StorageException exception) {
                 ui.showResponse("OOPS! " + exception.getMessage());
                 return;
             }
 
+            boolean exitCommandProcessed = false;
             while (ui.hasNextCommand()) {
                 String input = ui.readCommand();
                 try {
-                    if (shouldExitAfterProcessingCommand(input, tasks, storage, ui)) {
+                    CommandResult result = staniz.executeCommand(input);
+                    ui.showResponse(result.getResponse());
+                    if (result.shouldExit()) {
+                        exitCommandProcessed = true;
                         break;
                     }
                 } catch (StanizException | StorageException exception) {
@@ -47,57 +71,56 @@ public class Staniz {
                 }
             }
 
-            ui.showFarewell();
+            if (!exitCommandProcessed) {
+                ui.showFarewell();
+            }
         }
     }
 
     /**
-     * Processes one command and reports whether the application should exit.
+     * Processes one command against the loaded task list.
      *
      * @param input command entered by the user.
-     * @param tasks tasks that the command can read or update.
-     * @param storage persistence destination for task changes.
-     * @param ui user interface used to display command results.
-     * @return true only when the exit command is entered.
+     * @return user-facing response and whether the application should exit.
      * @throws StanizException if the command is invalid.
      * @throws StorageException if changed tasks cannot be saved.
      */
-    private static boolean shouldExitAfterProcessingCommand(
-            String input, TaskList tasks, Storage storage, Ui ui)
-            throws StanizException, StorageException {
+    public CommandResult executeCommand(String input) throws StanizException, StorageException {
         CommandType commandType = Parser.parseCommandType(input);
+        String response;
         switch (commandType) {
             case BYE:
-                return true;
+                return new CommandResult(ResponseFormatter.getFarewellMessage(), true);
             case LIST:
-                ui.showTasks(tasks);
+                response = ResponseFormatter.formatTasks(tasks);
                 break;
             case FIND:
-                ui.showMatchingTasks(tasks.find(Parser.parseFindKeyword(input)));
+                response = ResponseFormatter.formatMatchingTasks(
+                        tasks.find(Parser.parseFindKeyword(input)));
                 break;
             case MARK:
                 Task markedTask = tasks.markAsDone(
                         Parser.parseTaskIndex(input, CommandType.MARK, tasks.getTaskCount()));
-                ui.showTaskMarked(markedTask);
+                response = ResponseFormatter.formatTaskMarked(markedTask);
                 break;
             case UNMARK:
                 Task unmarkedTask = tasks.markAsNotDone(
                         Parser.parseTaskIndex(input, CommandType.UNMARK, tasks.getTaskCount()));
-                ui.showTaskUnmarked(unmarkedTask);
+                response = ResponseFormatter.formatTaskUnmarked(unmarkedTask);
                 break;
             case DELETE:
                 Task deletedTask = tasks.delete(
                         Parser.parseTaskIndex(input, CommandType.DELETE, tasks.getTaskCount()));
-                ui.showTaskDeleted(deletedTask, tasks.getTaskCount());
+                response = ResponseFormatter.formatTaskDeleted(deletedTask, tasks.getTaskCount());
                 break;
             case TODO:
-                addTask(Parser.parseTodo(input), tasks, ui);
+                response = addTask(Parser.parseTodo(input));
                 break;
             case DEADLINE:
-                addTask(Parser.parseDeadline(input), tasks, ui);
+                response = addTask(Parser.parseDeadline(input));
                 break;
             case EVENT:
-                addTask(Parser.parseEvent(input), tasks, ui);
+                response = addTask(Parser.parseEvent(input));
                 break;
             default:
                 throw new AssertionError("Unexpected command type: " + commandType);
@@ -105,18 +128,17 @@ public class Staniz {
         if (commandType.changesTasks()) {
             storage.save(tasks);
         }
-        return false;
+        return new CommandResult(response, false);
     }
 
     /**
      * Stores a parsed task and confirms its formatted representation to the user.
      *
      * @param task task to store.
-     * @param tasks list that receives the task.
-     * @param ui user interface used to confirm the addition.
+     * @return addition confirmation.
      */
-    private static void addTask(Task task, TaskList tasks, Ui ui) {
+    private String addTask(Task task) {
         tasks.add(task);
-        ui.showTaskAdded(task);
+        return ResponseFormatter.formatTaskAdded(task);
     }
 }

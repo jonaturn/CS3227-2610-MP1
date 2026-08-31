@@ -4,13 +4,18 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import staniz.command.CommandResult;
+import staniz.storage.Storage;
 
 /**
  * Tests the complete Staniz application loop in an isolated working directory.
@@ -19,6 +24,27 @@ class StanizTest {
 
     @TempDir
     Path temporaryDirectory;
+
+    @Test
+    void executeCommand_withMutatingAndExitCommandsReturnsResponsesAndPersists() throws Exception {
+        Path dataFile = temporaryDirectory.resolve("staniz.txt");
+        Staniz staniz = new Staniz(new Storage(dataFile));
+
+        CommandResult addedResult = staniz.executeCommand("todo test backend");
+        CommandResult listResult = staniz.executeCommand("list");
+        CommandResult exitResult = staniz.executeCommand("bye");
+
+        assertAll(
+                () -> assertEquals("added: [T][ ] test backend", addedResult.getResponse()),
+                () -> assertFalse(addedResult.shouldExit()),
+                () -> assertTrue(listResult.getResponse().contains("1.[T][ ] test backend")),
+                () -> assertFalse(listResult.shouldExit()),
+                () -> assertEquals("Bye. Hope to see you again soon!",
+                        exitResult.getResponse()),
+                () -> assertTrue(exitResult.shouldExit()),
+                () -> assertEquals("T | 0 | test backend",
+                        Files.readString(dataFile, UTF_8).strip()));
+    }
 
     /**
      * Runs the real entry point in a child JVM so its console and data file are isolated.

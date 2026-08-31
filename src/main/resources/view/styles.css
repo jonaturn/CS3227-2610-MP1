@@ -1,0 +1,88 @@
+.root {
+    -fx-background-color: #f3f5f9;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.header {
+    -fx-padding: 2 4 4 4;
+}
+
+.app-title {
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2937;
+}
+
+.app-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport,
+.dialog-container {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-background-insets: 0;
+    -fx-border-color: #dbe1ea;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.user-dialog,
+.staniz-dialog,
+.error-dialog {
+    -fx-background-radius: 14;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.user-dialog {
+    -fx-background-color: #3157d5;
+    -fx-text-fill: white;
+}
+
+.staniz-dialog {
+    -fx-background-color: white;
+    -fx-border-color: #dbe1ea;
+    -fx-border-radius: 14;
+    -fx-text-fill: #1f2937;
+}
+
+.error-dialog {
+    -fx-background-color: #fff1f2;
+    -fx-border-color: #fecdd3;
+    -fx-border-radius: 14;
+    -fx-text-fill: #9f1239;
+}
+
+.input-bar {
+    -fx-alignment: center;
+}
+
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-padding: 10 12 10 12;
+}
+
+.text-field:focused {
+    -fx-border-color: #3157d5;
+}
+
+.button {
+    -fx-background-color: #3157d5;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-padding: 10 18 10 18;
+    -fx-text-fill: white;
+}
+
+.button:hover {
+    -fx-background-color: #2747b5;
+}
