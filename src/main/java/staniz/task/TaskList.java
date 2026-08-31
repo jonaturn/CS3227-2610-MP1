@@ -10,10 +10,14 @@ public class TaskList {
     private final List<Task> tasks;
 
     /**
-     * Creates an empty task list.
+     * Creates a task list containing zero or more individually supplied tasks.
+     * Varargs keep simple callers concise while allowing {@code new TaskList()}
+     * to continue creating an empty list.
+     *
+     * @param tasks initial tasks in their desired order.
      */
-    public TaskList() {
-        this(List.of());
+    public TaskList(Task... tasks) {
+        this(List.of(tasks));
     }
 
     /**

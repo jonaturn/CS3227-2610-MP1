@@ -29,6 +29,19 @@ class TaskListTest {
     }
 
     @Test
+    void constructor_withVarargsPreservesTaskOrder() {
+        Task first = new Todo("first");
+        Task second = new Todo("second");
+
+        TaskList taskList = new TaskList(first, second);
+
+        assertAll(
+                () -> assertEquals(2, taskList.getTaskCount()),
+                () -> assertSame(first, taskList.get(0)),
+                () -> assertSame(second, taskList.get(1)));
+    }
+
+    @Test
     void addGetAndTaskCount_preserveInsertionOrder() {
         Task first = new Todo("first");
         Task second = new Todo("second");
@@ -46,7 +59,7 @@ class TaskListTest {
     @Test
     void markAndUnmark_changeAndReturnTheSelectedTask() {
         Task task = new Todo("selected");
-        TaskList taskList = new TaskList(List.of(task));
+        TaskList taskList = new TaskList(task);
 
         Task markedTask = taskList.markAsDone(0);
         assertAll(
@@ -64,7 +77,7 @@ class TaskListTest {
         Task first = new Todo("first");
         Task second = new Todo("second");
         Task third = new Todo("third");
-        TaskList taskList = new TaskList(List.of(first, second, third));
+        TaskList taskList = new TaskList(first, second, third);
 
         Task deletedTask = taskList.delete(1);
 
@@ -78,7 +91,7 @@ class TaskListTest {
         Task firstMatch = new Todo("read book");
         Task nonMatch = new Todo("buy groceries");
         Task secondMatch = new Todo("return book");
-        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        TaskList taskList = new TaskList(firstMatch, nonMatch, secondMatch);
 
         TaskList matchingTasks = taskList.find("book");
 
@@ -92,7 +105,7 @@ class TaskListTest {
     @Test
     void getTasks_returnsImmutableSnapshot() {
         Task first = new Todo("first");
-        TaskList taskList = new TaskList(List.of(first));
+        TaskList taskList = new TaskList(first);
 
         List<Task> taskSnapshot = taskList.getTasks();
         taskList.add(new Todo("later"));
