@@ -4,8 +4,17 @@ Staniz is a desktop task manager with a chat-style interface and a disciplined
 training-partner personality. It tracks to-dos, deadlines, and events using short
 text commands, and saves every task-changing command locally.
 
-See the [Staniz User Guide](docs/README.md) for installation instructions and the
+See the [Staniz User Guide](docs/UserGuide.md) for installation instructions and the
 complete command reference.
+
+Developers can refer to the [Staniz Developer Guide](docs/DeveloperGuide.md) for
+the architecture, design decisions, testing strategy, and release workflow.
+
+The repository also includes the
+[AI-assisted software engineering reflection](docs/Reflections.md) and the
+[chronological prompt summary](logs/PromptSummary.md). Major development
+decisions and outcomes are recorded in the
+[interaction summary](logs/DevelopmentInteractionSummary.md).
 
 ## Building and running
 
@@ -26,10 +35,10 @@ Build the distributable JAR from the repository root:
 
 | Platform | Build command | Run command |
 | --- | --- | --- |
-| Windows PowerShell | `.\gradlew shadowJar` | `java -jar .\build\libs\staniz.jar` |
-| macOS/Linux | `./gradlew shadowJar` | `java -jar build/libs/staniz.jar` |
+| Windows PowerShell | `.\gradlew shadowJar` | `java -jar .\release\staniz.jar` |
+| macOS/Linux | `./gradlew shadowJar` | `java -jar release/staniz.jar` |
 
-`shadowJar` creates `build/libs/staniz.jar` with the JavaFX and runtime
+`shadowJar` creates `release/staniz.jar` with the JavaFX and runtime
 dependencies included. A pre-built copy named `staniz.jar` can instead be
 started from its containing directory with `java -jar staniz.jar`.
 

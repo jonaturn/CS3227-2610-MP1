@@ -103,6 +103,7 @@ jar {
 
 shadowJar {
     archiveFileName = 'staniz.jar'
+    destinationDirectory = layout.projectDirectory.dir('release')
 }
 
 run {
