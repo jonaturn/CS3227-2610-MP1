@@ -1,332 +1,186 @@
-# Staniz User Guide
-
-Staniz is your personal task companion: a disciplined training partner that
-helps you capture objectives, track important dates, and finish what you start.
-You interact with Staniz by entering short commands into its chat window.
-
-![Staniz desktop application](Ui.png)
-
-## Quick start
-
-### Requirements
-
-- Java Development Kit (JDK) 25
-- The `staniz.jar` application file
-
-### Checking Java
-
-Open a terminal and confirm that the active Java version begins with `25`:
-
-```text
-java -version
-```
-
-Install or select JDK 25 before continuing if a different version is reported.
-
-### Starting a pre-built JAR
-
-1. Put `staniz.jar` in a folder where Staniz may create its `data` directory.
-2. Open a terminal in that folder.
-3. Run `java -jar staniz.jar`.
-4. Enter a command in the text field and press **Enter** or select **Send**.
-
-### Building and starting the JAR from source
-
-Open a terminal in the repository root—the folder containing `gradlew` and
-`build.gradle`—and run the commands for your operating system:
-
-#### Windows PowerShell
-
-```powershell
-.\gradlew shadowJar
-java -jar .\release\staniz.jar
-```
-
-#### macOS/Linux
-
-```bash
-./gradlew shadowJar
-java -jar release/staniz.jar
-```
-
-The first command compiles Staniz and packages its JavaFX and runtime
-dependencies into `release/staniz.jar`. The second command launches that JAR.
-
-To launch directly from source without first creating a JAR, run `.\gradlew run`
-on Windows or `./gradlew run` on macOS/Linux.
-
-### Performing a manual smoke test
-
-For an isolated test, copy `staniz.jar` into a new empty folder and launch it
-from that folder. This prevents existing task data from changing the expected
-task numbers. Enter the following commands one at a time:
-
-```text
-todo read Clean Code
-deadline submit report /by 2026-09-10
-event project retreat /from 2026-09-12 /to 2026-09-14
-list
-mark 1
-find report
-unmark 1
-delete 1
-deadline invalid example /by 10-09-2026
-list
-bye
-```
-
-Check that:
-
-- the first three commands add a to-do, deadline, and event;
-- the first `list` displays all three tasks in insertion order;
-- `mark`, `find`, `unmark`, and `delete` report the selected task correctly;
-- the invalid date produces guidance and does not change the task list;
-- the second `list` therefore contains the two undeleted tasks; and
-- `bye` displays the farewell before closing the window.
-
-After `bye` closes Staniz, relaunch it if you also want to verify that the two
-remaining tasks are restored from `data/staniz.txt`.
-
-## Reading the task list
-
-Staniz displays each task with a type and completion marker:
-
-| Symbol | Meaning |
-| --- | --- |
-| `[T]` | To-do |
-| `[D]` | Deadline |
-| `[E]` | Event |
-| `[ ]` | Incomplete |
-| `[X]` | Completed |
-
-For example, `[D][ ] Submit report (by: Sep 10 2026)` is an incomplete
-deadline.
-
-## Command overview
-
-| Action | Command format |
-| --- | --- |
-| Add a to-do | `todo DESCRIPTION` |
-| Add a deadline | `deadline DESCRIPTION /by DATE` |
-| Add an event | `event DESCRIPTION /from START_DATE /to END_DATE` |
-| Show all tasks | `list` |
-| Search task descriptions | `find KEYWORD` |
-| Mark a task completed | `mark TASK_NUMBER` |
-| Mark a task incomplete | `unmark TASK_NUMBER` |
-| Delete a task | `delete TASK_NUMBER` |
-| Exit Staniz | `bye` |
-
-Command words and search keywords are case-sensitive. Dates must use the
-`yyyy-MM-dd` format, such as `2026-09-10`. Staniz accepts extra spaces or tabs
-around command elements.
-
-### Syntax notation
-
-- Type command words such as `todo` and parameter words such as `/by` exactly as
-  shown.
-- Replace uppercase placeholders such as `DESCRIPTION`, `DATE`, and
-  `TASK_NUMBER` with your own values; do not type the placeholder itself.
-- Descriptions and search keywords must contain at least one non-whitespace
-  character.
-- `TASK_NUMBER` is a one-based whole number taken from `list`.
-- `DATE`, `START_DATE`, and `END_DATE` must be real calendar dates in
-  `yyyy-MM-dd` format.
-- `list` and `bye` take no additional arguments.
-
-## Adding a to-do
-
-Use `todo` for an objective without a specific date.
-
-Format: `todo DESCRIPTION`
-
-Example:
-
-```text
-todo read Clean Code
-```
-
-Expected result:
-
-```text
-Good. Another objective locked in:
-  [T][ ] read Clean Code
-```
-
-## Adding a deadline
-
-Use `deadline` for an objective that must be completed by a particular date.
-Specify `/by` exactly once.
-
-Format: `deadline DESCRIPTION /by DATE`
-
-Example:
-
-```text
-deadline submit report /by 2026-09-10
-```
-
-Expected result:
-
-```text
-Good. Another objective locked in:
-  [D][ ] submit report (by: Sep 10 2026)
-```
-
-## Adding an event
-
-Use `event` for an activity with a start date and an end date. Specify `/from`
-and `/to` exactly once each, in that order. The start date may be the same as the
-end date, but it cannot be later.
-
-Format: `event DESCRIPTION /from START_DATE /to END_DATE`
-
-Example:
-
-```text
-event project retreat /from 2026-09-12 /to 2026-09-14
-```
-
-Expected result:
-
-```text
-Good. Another objective locked in:
-  [E][ ] project retreat (from: Sep 12 2026 to: Sep 14 2026)
-```
-
-## Listing tasks
-
-Use `list` to show the complete training plan in its saved order.
-
-Format: `list`
-
-Example result:
-
-```text
-Current training plan:
-1.[T][ ] read Clean Code
-2.[D][ ] submit report (by: Sep 10 2026)
-3.[E][ ] project retreat (from: Sep 12 2026 to: Sep 14 2026)
-```
-
-The task numbers in this list are the numbers used by `mark`, `unmark`, and
-`delete`.
-
-## Finding tasks
-
-Use `find` to show tasks whose descriptions contain a keyword. Matching is
-case-sensitive and also finds partial words.
-
-Format: `find KEYWORD`
-
-Example:
-
-```text
-find report
-```
-
-Example result:
-
-```text
-Matching objectives:
-1.[D][ ] submit report (by: Sep 10 2026)
-```
-
-The numbers in search results are local to those results. To change or delete a
-task, use its number from `list`, not its number from `find`.
-
-## Marking a task as completed
-
-Use the task's number from `list`.
-
-Format: `mark TASK_NUMBER`
-
-Example:
-
-```text
-mark 1
-```
-
-Expected result:
-
-```text
-Strong work. One more task conquered:
-  [T][X] read Clean Code
-```
-
-## Marking a task as incomplete
-
-Use `unmark` when a completed task needs more work.
-
-Format: `unmark TASK_NUMBER`
-
-Example:
-
-```text
-unmark 1
-```
-
-Expected result:
-
-```text
-Reset accepted. This objective is active again:
-  [T][ ] read Clean Code
-```
-
-## Deleting a task
-
-Use the task's number from `list`. The tasks after it are renumbered
-automatically.
-
-Format: `delete TASK_NUMBER`
-
-Example:
-
-```text
-delete 1
-```
-
-Example result:
-
-```text
-Cutting dead weight. This task is gone:
-  [T][ ] read Clean Code
-You have 2 objectives left in the program.
-```
-
-## Exiting Staniz
-
-Use `bye` without any additional arguments. Staniz displays its farewell and
-then closes the window.
-
-Format: `bye`
-
-Expected result:
-
-```text
-Session complete. Stay disciplined.
-```
-
-## Saving task data
-
-Staniz saves changes automatically after successfully adding, marking,
-unmarking, or deleting a task. It restores those tasks the next time it starts.
-The data is stored at `data/staniz.txt`, relative to the folder from which the
-application was launched.
-
-Avoid editing the data file manually. Invalid saved data is reported at startup
-instead of being silently discarded.
-
-## Troubleshooting commands
-
-If a command cannot be processed, Staniz explains what is wrong and usually
-shows a valid example. Common causes include:
-
-- leaving out a task description, keyword, date, or task number;
-- entering a task number that is not present in `list`;
-- using a date that is not in `yyyy-MM-dd` format;
-- repeating `/by`, `/from`, or `/to`;
-- placing `/to` before `/from` in an event; or
-- adding arguments after `list` or `bye`.
-
-Rejected commands do not change the saved task list. Correct the command using
-the guidance in the error message and submit it again.
+# Staniz Workout Planner — User Guide
+
+Staniz manages one person's active workout split. A split contains one to seven
+ordered workout days, such as Push, Pull, and Legs. These are training sessions,
+not calendar days. Before setting up a split, the application starts empty with
+a library of ten exercise names.
+
+## Starting the app
+
+Install JDK 25, then run `java -jar release/staniz.jar` from the repository root.
+To build the JAR first, use `.\gradlew.bat shadowJar` on Windows or
+`./gradlew shadowJar` on macOS/Linux. From source, use the equivalent `run` task.
+
+Keep the launch directory consistent: your save is `data/workouts.json` relative
+to that directory. No account, database server, or network connection is needed
+to use the packaged application.
+
+## Exercises
+
+Open **Exercises** to see the library. Enter a name and select **Add exercise**.
+Use **Search your exercises** to filter by name, ignoring letter case. Clear
+the search to show the full library again. Searching never changes saved data.
+Names must not be blank and duplicates are rejected regardless of letter case.
+Leading and trailing spaces are removed. The library stores names only; weights
+and reps belong to each workout's sets.
+
+The starter library includes Bench press, Squat, Deadlift, Overhead press,
+Barbell row, Pull-up, Lat pulldown, Leg press, Biceps curl, and Triceps pushdown.
+Exercise names are fixed after creation. To use a different exercise, select it
+in the workout or history editor; this replaces that entry without renaming a
+library exercise. To correct a library-name typo, add a new exercise and archive
+the old one; they have separate performance histories.
+Select a library row to **Archive / restore** it. Archived exercises are hidden
+from new selections; existing plans and history remain.
+Enable **Show archived** to restore them. Names remain unique across active and
+archived entries. Exercises are not permanently deleted.
+
+## My Split
+
+1. Enter a workout day name, such as **Push**, and select **Add day**.
+2. Select the day and choose **Edit workout**.
+3. Select **+ Add exercise**, then choose an exercise from the library.
+4. Enter a weight in kg and reps for each set. Any positive whole-number count
+   (such as `5`, `8`, or `15`) or inclusive range (such as `3-5`, `8-12`, or
+   `10-15`) works. The field hint **Count or range** describes these two formats.
+   Select **+ Add set** for more sets.
+5. Add more exercises in workout order and select **Save workout**.
+
+Use **Duplicate last set** to copy its weight and reps into another row, then
+adjust them if needed. The last remaining set cannot be removed on its own;
+use **Remove exercise** to omit the entire exercise instead.
+
+Use **Move up** or **Move down** inside an exercise card to change exercise order.
+**Duplicate day** creates an independent copy at the end of the split, subject
+to the seven-day limit. **Copy sets** lets you choose a source day/exercise and a
+destination day/exercise. It replaces the destination's sets while preserving
+its exercise name. Cancel leaves the plan unchanged.
+
+Example: Bench press, set 1 at 60 kg for 8–12 reps, set 2 at 70 kg for 8 reps.
+Each row represents one set. Weights can be fractional or zero (for example,
+zero added weight on a bodyweight exercise). Negative or nonfinite weights,
+zero/negative reps, and reversed ranges are rejected.
+
+You can rename a day in its editor, remove exercises or sets, move a day up or
+down, and remove a day after confirmation. A maximum of seven days is allowed.
+Empty days may be saved while planning, but cannot be completed until they have
+exercises. Every exercise entry must contain at least one set; remove the whole
+exercise if it is no longer needed.
+
+Editing and reordering preserve the current workout's identity. Removing the
+current day selects the following day, wrapping to the first if necessary.
+Removing every day returns the app to its initial planning state while keeping
+the exercise library and history.
+
+**Cancel** discards draft edits. Invalid input keeps the editor open with a
+message so it can be corrected without changing the saved plan. The offending
+field is highlighted and focused, whether it is a set value or an exercise that
+was never chosen, and the message names the row, such as **Set 2** or
+**Exercise 1**. Editing that field, or choosing an exercise, clears the message
+and the highlight.
+
+## Current Workout
+
+This view shows the current day, its exercises and sets, and the next day.
+The summary includes exercise and set counts, and the split chips show where
+you are in the cycle. Completion and skip controls remain below the scrolling
+workout list so they stay available when the window is small or the workout is long.
+If you have no split yet, **Build my split** opens setup directly. An empty
+current day offers **Plan this workout** to open its editor.
+**Start workout** opens active workout mode. The previous exact performance is
+shown beside each exercise. Older saved snapshots remain linked by exercise identity.
+You can also use these quick actions:
+
+| Action | History | Cycle |
+| --- | --- | --- |
+| Complete as planned | Saves the prescribed sets, including rep ranges | Advances |
+| Record with changes | Saves the exact performed sets you enter | Advances after saving |
+| Complete without recording | Adds no performance record | Advances |
+| Skip workout | Adds no completion record | Advances |
+
+The last day wraps to the first; a one-day split returns to the same workout.
+Opening the app or changing views never advances the cycle automatically.
+
+**Complete as planned** does not invent exact reps for a range. The history
+entry explicitly identifies these as prescribed sets. To record actual reps,
+choose **Record with changes**. Exact prescribed counts are prefilled; planned
+ranges leave the actual rep field empty for you to fill in. You can change kg,
+remove skipped sets or exercises, and add extra sets or library exercises.
+Removing every exercise records an empty performed session. To simply move on
+without a performance record, use Skip instead. Cancelling recording leaves the
+current day unchanged.
+
+### Active workout mode
+
+Enter actual kg and exact reps as you train, then tick **Done** for each set.
+Ranged prescriptions leave actual reps blank until entered. Uncheck a completed
+set to correct it. The progress bar and remaining count show what is left.
+Set entries and completion ticks save immediately, including unfinished text;
+closing and reopening the app resumes the session.
+
+**Finish session** records checked sets and advances once. If some sets remain,
+confirm that only checked sets should be recorded. At least one completed set is
+required. **Discard session** removes the active draft without recording or
+advancing; you can then skip the workout if needed. Finish or discard the active
+session before changing the split or using other completion actions.
+
+Active mode tracks the sets from the starting plan. To add extra exercises or
+sets to a performance record, use **Record with changes**, or correct the saved
+session afterward in History.
+
+## History
+
+Open **History** and select a session to see its sets. Newest recordings appear
+first, with local date/time, workout name, and recording type. Timestamps describe
+when a session was recorded; they do not determine the split order.
+
+Filter by workout-day name (case-insensitive partial match) and/or a library
+exercise. Archived exercises remain available in these filters.
+Select **Correct record** to fix a workout name, weights, reps, or exercise/set
+list. Invalid entries keep the editor open. Save preserves the original date,
+record identity and recording type, and does not advance the split or change
+the planned routine. Cancel leaves the record unchanged.
+
+Replacing an exercise in a past session moves that entry's measured performance
+to the newly selected exercise's previous-performance and progress views. Existing
+weights and reps stay in the editor, so correct them if necessary. The library,
+other sessions, planned workouts, and any active session remain unchanged.
+
+Renaming, editing, or removing a planned workout never rewrites history. Only
+an explicit history correction changes its snapshot. History deletion is not
+provided.
+
+## Progress
+
+Choose an exercise in **Progress** to review its exact recorded sets over time.
+Archived exercises remain available. With at least two recorded sessions, charts
+show the heaviest recorded set in kg and total recorded reps per session. Session
+numbers run chronologically; dated details below the charts list each set.
+Corrections appear in these views and previous-performance comparisons.
+
+As-planned records are prescriptions, so they are excluded even when their rep
+targets are exact. Use active mode or Record with changes to capture performance.
+
+## Saving and recovery
+
+Successful changes save automatically to `data/workouts.json`. Routine and
+history dialogs save when you press Save; active-session typing saves as you go.
+If saving fails, an error appears and the change is not applied. Correct the
+storage problem and retry. Your draft is kept either way: a dialog stays open
+with what you entered, and in active workout mode the entry you were typing stays
+on screen, so once storage recovers the next thing you type saves it too. Only a
+set you had ticked is unticked again, to match what is actually saved.
+
+On first use, a missing file loads the starter library. The file is created on
+your first saved change. A malformed existing file produces a startup error;
+Staniz does not overwrite it or silently reset your workouts. Close the app and
+restore a backup or correct the file before restarting. Keep a separate backup
+of `data/workouts.json`, and open only one app instance for that file.
+
+Older version-one workout files are upgraded automatically. Before the first
+save in version two, the original is copied to `data/workouts.json.v1.bak` if
+that backup does not already exist. Keep this backup if you may need the old app;
+the old app cannot read version-two saves.
+
+Old task data in `data/staniz.txt` is preserved but is not imported. There is no
+command-line interface in this version; all workout interaction uses JavaFX.

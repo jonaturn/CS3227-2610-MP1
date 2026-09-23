@@ -1,426 +1,85 @@
-# Staniz UI Test Plan
-
-Run these cases with the project `test-ui` skill. Expected output entries are
-ordered fragments; the banner and decorative separators are intentionally omitted.
-
-## Case 1: Create and list all task types
-
-Aim: Confirm that to-dos, deadlines, and events use their respective type markers and scheduling details.
-
-Input:
-
-```text
-todo borrow book
-deadline return book /by 2019-12-02
-event project meeting /from 2019-12-02 /to 2019-12-03
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] borrow book
-Good. Another objective locked in:
-  [D][ ] return book (by: Dec 02 2019)
-Good. Another objective locked in:
-  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-1.[T][ ] borrow book
-2.[D][ ] return book (by: Dec 02 2019)
-3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-Session complete. Stay disciplined.
-```
-
-## Case 2: Mark each task type
-
-Aim: Confirm that inherited status behavior works for every concrete task type without losing type-specific information.
-
-Input:
-
-```text
-todo borrow book
-deadline return book /by 2019-12-02
-event project meeting /from 2019-12-02 /to 2019-12-03
-mark 1
-mark 2
-mark 3
-list
-bye
-```
-
-Expected output:
-
-```text
-Strong work. One more task conquered:
-  [T][X] borrow book
-Strong work. One more task conquered:
-  [D][X] return book (by: Dec 02 2019)
-Strong work. One more task conquered:
-  [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-1.[T][X] borrow book
-2.[D][X] return book (by: Dec 02 2019)
-3.[E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-```
-
-## Case 3: Unmark a scheduled task
-
-Aim: Confirm that an inherited status can be reversed while an event retains its start and end times.
-
-Input:
-
-```text
-event project meeting /from 2019-12-02 /to 2019-12-03
-mark 1
-unmark 1
-list
-bye
-```
-
-Expected output:
-
-```text
-  [E][X] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-Reset accepted. This objective is active again:
-  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-1.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-```
-
-## Case 4: Recover from blank and unknown commands
-
-Aim: Confirm that basic input errors are explained and do not prevent later valid commands from succeeding.
-
-Input:
-
-```text
-
-todo
-todo borrow book
-blah
-list
-bye
-```
-
-Expected output:
-
-```text
-Form check: enter a command.
-Form check: a todo needs a description. Try: todo borrow book
-Good. Another objective locked in:
-  [T][ ] borrow book
-Form check: I don't recognize that command. Try todo, deadline, event, list, find, mark, unmark, delete, or bye.
-1.[T][ ] borrow book
-```
-
-## Case 5: Validate scheduled task fields
-
-Aim: Confirm that every required deadline and event field is validated and only valid scheduled tasks are stored.
-
-Input:
-
-```text
-deadline return book
-deadline  /by 2019-12-02
-deadline return book /by
-deadline return book /by 2019-12-02
-event project meeting
-event project meeting /from 2019-12-02
-event  /from 2019-12-02 /to 2019-12-03
-event project meeting /from /to 2019-12-03
-event project meeting /from 2019-12-02 /to
-event project meeting /from 2019-12-02 /to 2019-12-03
-list
-bye
-```
-
-Expected output:
-
-```text
-Form check: a deadline needs '/by'. Try: deadline return book /by 2019-12-02
-Form check: a deadline needs a description before '/by'.
-Form check: a deadline needs a due time after '/by'.
-Good. Another objective locked in:
-  [D][ ] return book (by: Dec 02 2019)
-Form check: an event needs '/from' and '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
-Form check: an event needs an end time after '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
-Form check: an event needs a description before '/from'.
-Form check: an event needs a start time after '/from'.
-Form check: an event needs an end time after '/to'.
-Good. Another objective locked in:
-  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-1.[D][ ] return book (by: Dec 02 2019)
-2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-```
-
-## Case 6: Validate status command task numbers
-
-Aim: Confirm that invalid mark and unmark numbers are explained without changing task status or stopping later commands.
-
-Input:
-
-```text
-todo borrow book
-mark
-mark two
-mark 0
-mark 2
-unmark -1
-mark 1
-unmark
-unmark 1
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] borrow book
-Form check: 'mark' needs a task number. Try: mark 1
-Form check: the task number must be a whole number.
-Form check: there is no task numbered 0. Your training plan currently has 1 task(s).
-Form check: there is no task numbered 2. Your training plan currently has 1 task(s).
-Form check: there is no task numbered -1. Your training plan currently has 1 task(s).
-  [T][X] borrow book
-Form check: 'unmark' needs a task number. Try: unmark 1
-  [T][ ] borrow book
-1.[T][ ] borrow book
-```
-
-## Case 7: Delete tasks and renumber the list
-
-Aim: Confirm that deleting middle, last, and only remaining tasks preserves order and reports the correct count.
-
-Input:
-
-```text
-todo first task
-deadline middle task /by 2019-12-02
-event last task /from 2019-12-02 /to 2019-12-03
-delete 2
-list
-delete 2
-delete 1
-list
-bye
-```
-
-Expected output:
-
-```text
-Cutting dead weight. This task is gone:
-  [D][ ] middle task (by: Dec 02 2019)
-You have 2 objectives left in the program.
-1.[T][ ] first task
-2.[E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
-Cutting dead weight. This task is gone:
-  [E][ ] last task (from: Dec 02 2019 to: Dec 03 2019)
-You have 1 objective left in the program.
-Cutting dead weight. This task is gone:
-  [T][ ] first task
-You have 0 objectives left in the program.
-Current training plan:
-```
-
-## Case 8: Reject invalid delete task numbers
-
-Aim: Confirm that invalid delete commands are explained and leave the task list unchanged.
-
-Input:
-
-```text
-todo borrow book
-delete
-delete two
-delete 0
-delete 2
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] borrow book
-Form check: 'delete' needs a task number. Try: delete 1
-Form check: the task number must be a whole number.
-Form check: there is no task numbered 0. Your training plan currently has 1 task(s).
-Form check: there is no task numbered 2. Your training plan currently has 1 task(s).
-1.[T][ ] borrow book
-```
-
-## Case 9: Load all task types after restart
-
-Aim: Confirm that task types, order, completion status, and escaped text survive an application restart.
-
-Input:
-
-```text
-todo read C:\docs | notes
-deadline return book /by 2019-12-02
-event project meeting /from 2019-12-02 /to 2019-12-03
-mark 2
-bye
-<restart>
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] read C:\docs | notes
-Good. Another objective locked in:
-  [D][ ] return book (by: Dec 02 2019)
-Good. Another objective locked in:
-  [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-  [D][X] return book (by: Dec 02 2019)
-1.[T][ ] read C:\docs | notes
-2.[D][X] return book (by: Dec 02 2019)
-3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-```
-
-## Case 10: Persist unmark and delete operations
-
-Aim: Confirm that status reversals and deletions remain applied across multiple application restarts.
-
-Input:
-
-```text
-todo borrow book
-deadline return book /by 2019-12-02
-event project meeting /from 2019-12-02 /to 2019-12-03
-mark 2
-bye
-<restart>
-unmark 2
-delete 1
-bye
-<restart>
-list
-bye
-```
-
-Expected output:
-
-```text
-  [D][X] return book (by: Dec 02 2019)
-  [D][ ] return book (by: Dec 02 2019)
-  [T][ ] borrow book
-You have 2 objectives left in the program.
-1.[D][ ] return book (by: Dec 02 2019)
-2.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
-```
-
-## Case 11: Validate calendar dates and event order
-
-Aim: Confirm that valid dates are accepted while malformed, impossible, and reversed dates are rejected safely.
-
-Input:
-
-```text
-deadline leap day /by 2024-02-29
-deadline wrong format /by 29-02-2024
-deadline impossible date /by 2023-02-29
-event invalid start /from 03-01-2024 /to 2024-03-02
-event invalid end /from 2024-03-01 /to 03-02-2024
-event reversed /from 2024-03-02 /to 2024-03-01
-event same day /from 2024-03-01 /to 2024-03-01
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [D][ ] leap day (by: Feb 29 2024)
-Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
-Form check: the deadline date must use yyyy-MM-dd, e.g. 2019-12-02.
-Form check: the event start date must use yyyy-MM-dd, e.g. 2019-12-02.
-Form check: the event end date must use yyyy-MM-dd, e.g. 2019-12-02.
-Form check: the event start date cannot be after the end date.
-Good. Another objective locked in:
-  [E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
-1.[D][ ] leap day (by: Feb 29 2024)
-2.[E][ ] same day (from: Mar 01 2024 to: Mar 01 2024)
-```
-
-## Case 12: Find tasks by description keyword
-
-Aim: Confirm that find displays matches in order, rejects a missing keyword safely, and handles no matches.
-
-Input:
-
-```text
-todo read book
-deadline return book /by 2019-12-02
-todo buy groceries
-find book
-find
-find absent
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] read book
-Good. Another objective locked in:
-  [D][ ] return book (by: Dec 02 2019)
-Good. Another objective locked in:
-  [T][ ] buy groceries
-Matching objectives:
-1.[T][ ] read book
-2.[D][ ] return book (by: Dec 02 2019)
-Form check: 'find' needs a keyword. Try: find book
-Matching objectives:
-Current training plan:
-1.[T][ ] read book
-2.[D][ ] return book (by: Dec 02 2019)
-3.[T][ ] buy groceries
-Session complete. Stay disciplined.
-```
-
-## Case 13: Normalize whitespace and reject ambiguous parameters
-
-Aim: Confirm that harmless command whitespace is accepted while extra or duplicated parameters are rejected without corrupting later task state.
-
-Input:
-
-```text
-   todo    spaced   task
-list unexpected
-list
-deadline duplicate /by 2019-12-02 /by 2019-12-03
-event reversed /to 2019-12-03 /from 2019-12-02
-event duplicate /from 2019-12-02 /from 2019-12-03 /to 2019-12-04
-deadline    valid deadline    /by    2019-12-02
-bye now
-list
-bye
-```
-
-Expected output:
-
-```text
-Good. Another objective locked in:
-  [T][ ] spaced   task
-Form check: 'list' does not take arguments. Try: list
-1.[T][ ] spaced   task
-Form check: '/by' must be specified exactly once. Try: deadline return book /by 2019-12-02
-Form check: '/from' must appear before '/to'. Try: event meeting /from 2019-12-02 /to 2019-12-03
-Form check: '/from' must be specified exactly once. Try: event meeting /from 2019-12-02 /to 2019-12-03
-Good. Another objective locked in:
-  [D][ ] valid deadline (by: Dec 02 2019)
-Form check: 'bye' does not take arguments. Try: bye
-Current training plan:
-1.[T][ ] spaced   task
-2.[D][ ] valid deadline (by: Dec 02 2019)
-Session complete. Stay disciplined.
-```
+# Staniz JavaFX UI test plan
+
+The app has no CLI. These scenarios replace the former task-command cases.
+Run `.\gradlew.bat guiTest` (Windows) or `./gradlew guiTest` (macOS/Linux) using
+Java 25 and a desktop. On Linux without a display: `xvfb-run -a ./gradlew guiTest`.
+The PowerShell convenience wrapper is `.\test\run-tests.ps1 -JavaHome <JDK25>`.
+
+`WorkoutGuiTest` runs the sequence below against isolated temporary JSON, stops
+on its first assertion failure, and prints each action and checked result.
+Artifacts are `build/gui-test/transcript.txt`, PNG screenshots in that directory,
+and `build/reports/tests/guiTest/index.html`. No production user data is touched.
+
+| Case | Action | Expected result and state check |
+| --- | --- | --- |
+| 1 | Open a fresh app; select Build my split | Starter library, empty split and history; setup opens My Split directly |
+| 2 | Add a blank exercise | Error; library still contains ten entries |
+| 3 | Add Cable fly, then duplicate cable FLY; search CABLE, an unknown name, then clear | Duplicate rejected; filtering finds Cable fly or shows no matches; clearing restores eleven entries without mutating data |
+| 4 | Add Push, reject blank day, then add Pull and Legs | Three days in order; Push remains current |
+| 4a | Edit Push; add an exercise row and save without choosing an exercise, then choose Bench press | Error names the row ("Exercise 1") and marks the selector; saved day unchanged; choosing an exercise clears both the mark and the message |
+| 5 | Edit Push; enter -1 kg, then range 12-8 | Both saves rejected; editor remains open, saved day unchanged |
+| 6 | Correct invalid input; duplicate last set, then change the copy to 70 kg × 8 | Error clears; duplicate initially retains 60 kg × 8-12; two individual sets saved with distinct weights |
+| 7 | Plan Pull with 10-15 reps and Legs with 5 reps; move Legs up and down | Both rep formats saved correctly; order restored; current workout retains its identity |
+| 8 | Resize to minimum content size, then complete Push as planned | Completion/skip actions remain visible; range preserved in history; Pull becomes current |
+| 9 | Skip Pull | Legs becomes current; no added history |
+| 10 | Complete Legs without recording | Wraps to Push; still one history record |
+| 11 | Change a recording draft, then Cancel | Plan, position, and history unchanged |
+| 12 | Save actual workout without filling a ranged set's reps | Exact reps required; no state change |
+| 13 | Record changed weights/reps and an extra set | Actual snapshot saved; plan unchanged; cycle advances |
+| 13a | Open Progress after a single exact recording of Bench press | Count reads "1 exact recorded session" in the singular; charts stay hidden until a second session exists |
+| 14 | Record another session: remove planned exercise, add Cable fly and remove a set; open History | Actual replacement saved, original plan unchanged; three records available |
+| 14a | Correct an as-planned history record: reject 12-8, then save 61 kg x 8-12 | Invalid draft leaves state unchanged; valid range saved with record ID/type/date, other history, plan, library and cycle position preserved; reload matches |
+| 15 | Recreate the app/service from the same save | Library, plan, history, and current day restored |
+| 16 | Add days up to seven, attempt eighth | Guidance shows 7 and badge shows 7 / 7 days; Add and Duplicate disabled; still seven days |
+| 17 | Cancel day removal, then remove current day | Cancellation preserves split; removal selects successor; history intact |
+| 18 | Simulate failed completion save, then retry successfully | First attempt changes neither memory nor disk; retry records/advances once |
+| 19 | Start active workout; attempt to tick a ranged actual rep entry | Exact reps required; completion unchecked and history unchanged |
+| 20 | Enter 62.5 kg × 10, tick Done, then restart | Actual values and completion restored; two sets remain |
+| 20a | While saving fails, type a weight into another set, then restore storage and change that set's reps | Typed weight stays on screen with a failure message and nothing is saved; after recovery the retained weight persists without retyping it |
+| 21 | Cancel partial finish, then confirm it | Cancellation preserves active session; confirmation records only checked work and shows previous performance |
+| 22a | In Copy sets, confirm with no source exercise selected, then reselect one and copy | Copy rejected with a visible message and an unchanged split; the message clears as soon as a selection changes; the corrected copy then saves |
+| 22 | Duplicate day with blank name, correct name, reorder copied exercises, copy sets across days | Blank name rejected; new day gets independent identity; target prescription copied, original order unchanged |
+| 23 | Verify fixed-name guidance and no Rename action; archive Bench press, show archived and restore | Library names/IDs, plans, and history remain unchanged after restore |
+| 24 | Filter history by unknown day, then Push and Bench press | Empty result does not change data; original session found by stable exercise ID |
+| 25 | Correct actual record with zero reps, then a range, then valid 65 kg × 11 | Both invalid edits rejected; exact-count correction preserves timestamp and position and updates previous performance |
+| 26 | Record another session, then open Progress | Two exact recordings produce weight and rep charts, including corrected first record |
+| 27 | Replace historical Bench press with Squat; reject zero reps, then save 80 kg x 8 | Rejection preserves state; replacement retains record ID/date, updates performance attribution, and preserves library, plans and cycle position |
+| 28 | Replace a planned exercise with Squat and reload | Selected workout changes; library names/IDs, history and cycle position remain unchanged |
+
+Backend tests additionally cover unknown exercises, invalid indexes, zero/negative
+reps, nonfinite weights, empty-day completion, a one-day cycle, deleting every
+day, omitted exercise recording, corrupt JSON, unreadable paths, and preservation
+of the legacy task data file. Run `gradlew check` for these cases.
+Additional backend checks cover migration without rewriting on load, original-file
+backup, stable identity after archive/restore, seven-day duplication limits,
+correction validation, discarded sessions, invalid drafts, and failed active-session saves.
+Backend identity checks also reject a planned name paired with another library
+exercise's ID without changing memory or disk, reject such saved JSON without
+overwriting it, reject mismatched ID/name pairs in actual recordings and corrections,
+and preserve older saved active/history snapshots with names from previous releases.
+
+## Manual release checks
+
+- Launch `java -jar release/staniz.jar` from a clean directory; verify startup
+  and first-use guidance, then create a split and restart from the same directory.
+- Inspect all five tabs and editor dialogs at the minimum window size and normal
+  display scaling. Check that long names wrap and many exercises/sets scroll.
+- Navigate fields and buttons using Tab/Shift+Tab and cancel an editor with Escape.
+- In actual recording, remove a skipped set/exercise and add an extra exercise.
+- Restore a copied JSON backup; confirm the saved current day and history return.
+- Start with malformed JSON in an isolated directory; expect a clear startup
+  error and an unchanged file, never a silent reset.
+- In a copied save, remove a set's `kg`, then separately give `minReps` a fractional
+  value. Each launch should report the offending JSON field and leave the file
+  unchanged. Restore the valid copy and confirm normal loading. Automated backend
+  tests cover these cases along with wrong types, integer overflow, history and
+  session fields, optional sessions, and version-one migration.
+- In a copied save, set `minReps` to -1. Expect the startup alert to explain that
+  reps must be positive, retaining the file path and recovery guidance, without
+  a constructor-invocation message. Confirm the file is unchanged, then restore
+  the valid copy and relaunch. Backend tests also verify invalid weights,
+  mismatched exercise names/IDs, and completed-session input errors, preserving
+  the full exception chain for debugging.
+
+Record manual results separately from automated results; screenshots alone do
+not prove keyboard or packaged-launch behavior.

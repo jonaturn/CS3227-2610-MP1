@@ -1,53 +1,57 @@
-# Staniz
+# Staniz Workout Planner
 
-Staniz is a desktop task manager with a chat-style interface and a disciplined
-training-partner personality. It tracks to-dos, deadlines, and events using short
-text commands, and saves every task-changing command locally.
+A JavaFX desktop application for one person's workout split. Build an exercise
+library, plan up to seven workout days, and cycle through them at your own pace,
+independently of weekdays or the calendar.
 
-See the [Staniz User Guide](docs/UserGuide.md) for installation instructions and the
-complete command reference.
+- Start with ten exercises; add, search, archive, and restore library entries with fixed names.
+- Plan each individual set with kg and an exact rep count or rep range.
+- Duplicate days, reorder exercises, and copy sets within or between workout days.
+- Start a workout, enter actual kg/reps, and tick individual sets with automatic session recovery.
+- See previous performance beside each exercise.
+- Complete a workout as planned, record changed performance, or complete without recording.
+- Skip a workout and pick up at the next day; the last day wraps to the first.
+- Filter and correct history without changing your routine or current position.
+- Review recorded sets over time, with weight and rep charts after two exact recordings.
+- Resume your split after restarting; changes save automatically to local JSON.
 
-Developers can refer to the [Staniz Developer Guide](docs/DeveloperGuide.md) for
-the architecture, design decisions, testing strategy, and release workflow.
+See the [User Guide](docs/UserGuide.md), [Developer Guide](docs/DeveloperGuide.md),
+and [GUI test plan](test/ui-test-plan.md).
 
-The repository also includes the
-[AI-assisted software engineering reflection](docs/Reflections.md) and the
-[chronological prompt summary](logs/PromptSummary.md). Major development
-decisions and outcomes are recorded in the
-[interaction summary](logs/DevelopmentInteractionSummary.md).
+## Build and run
 
-## Building and running
+Use **JDK 25**. Set `JAVA_HOME` to its installation directory and add its `bin`
+directory to `PATH`. Confirm `java -version` reports version 25.
 
-Staniz requires JDK 25. Confirm that the active Java version begins with `25`:
+On Windows, `.\run-workouts.ps1` launches the packaged app from this repository.
+It uses `JAVA_HOME`, or the portable JDK in `_temp/tools/java25/` if available.
+You can also pass `-JavaHome <JDK25 path>` without changing global settings.
 
-```text
-java -version
-```
-
-Run Staniz directly from its source directory:
-
-| Platform | Command |
-| --- | --- |
-| Windows PowerShell | `.\gradlew run` |
-| macOS/Linux | `./gradlew run` |
-
-Build the distributable JAR from the repository root:
-
-| Platform | Build command | Run command |
+| Task | Windows PowerShell | macOS / Linux |
 | --- | --- | --- |
-| Windows PowerShell | `.\gradlew shadowJar` | `java -jar .\release\staniz.jar` |
-| macOS/Linux | `./gradlew shadowJar` | `java -jar release/staniz.jar` |
+| Run from source | `.\gradlew.bat run` | `./gradlew run` |
+| Backend tests and style checks | `.\gradlew.bat check` | `./gradlew check` |
+| Desktop interaction tests | `.\gradlew.bat guiTest` | `./gradlew guiTest` |
+| Package executable JAR | `.\gradlew.bat shadowJar` | `./gradlew shadowJar` |
+| Run packaged app | `java -jar release/staniz.jar` | `java -jar release/staniz.jar` |
 
-`shadowJar` creates `release/staniz.jar` with the JavaFX and runtime
-dependencies included. A pre-built copy named `staniz.jar` can instead be
-started from its containing directory with `java -jar staniz.jar`.
+GUI tests require a desktop; on Linux CI use `xvfb-run -a ./gradlew guiTest`.
+They generate a console transcript and screenshots in `build/gui-test/`.
 
-## Verification commands
+## Saved data
 
-| Platform | Tests | Tests and code-quality checks |
-| --- | --- | --- |
-| Windows PowerShell | `.\gradlew test` | `.\gradlew check` |
-| macOS/Linux | `./gradlew test` | `./gradlew check` |
+`data/workouts.json` is relative to the directory where the app is launched.
+It contains the exercise library, split, current day, active session, and history together, so
+recording a workout and advancing the cycle use a single save. Close the app
+before copying this file as a backup or moving it to another computer. Run only
+one instance against a given save file.
 
-Task data is stored relative to the directory from which Staniz is launched, at
-`data/staniz.txt`.
+Existing version-one saves are migrated automatically, with their original bytes
+backed up to `data/workouts.json.v1.bak` before the first save in version two.
+
+Legacy task-manager data in `data/staniz.txt` is left untouched. This version
+does not expose the former task commands or import tasks as workouts.
+
+The project retains its original Git history and the historical
+[AI reflection](docs/Reflections.md) and [prompt log](logs/PromptSummary.md).
+Those older sections describe the previous task-manager implementation.

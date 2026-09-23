@@ -10,8 +10,12 @@ plugins {
 def automatedTestExclusions = ['staniz/gui/**']
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    // The toolchain states which JDK builds the project, not just which bytecode is emitted, so a
+    // machine without JDK 25 fails with an explicit toolchain message instead of "invalid source
+    // release: 25". Gradle selects any detected JDK 25, including the one JAVA_HOME points at.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 repositories {
@@ -27,6 +31,7 @@ jacoco {
 }
 
 dependencies {
+    implementation 'com.google.code.gson:gson:2.13.2'
     String javaFxVersion = '17.0.7'
     String jUnitVersion = '5.14.4'
 
@@ -36,9 +41,6 @@ dependencies {
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:win"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:linux"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:win"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
@@ -51,7 +53,15 @@ dependencies {
 
 test {
     enableAssertions = true
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'gui'
+    }
+
+    // UiTestPlanCoverageTest reads the plan, so it gets the absolute path rather than guessing at
+    // the working directory. Declaring the file as an input makes editing the plan rerun the suite;
+    // otherwise Gradle treats the task as up to date and the drift check never runs.
+    systemProperty 'staniz.ui.plan', file('test/ui-test-plan.md').absolutePath
+    inputs.file('test/ui-test-plan.md').withPropertyName('uiTestPlan')
 
     testLogging {
         events 'passed', 'skipped', 'failed'
@@ -61,6 +71,25 @@ test {
         showCauses = true
         showStackTraces = true
         showStandardStreams = false
+    }
+}
+
+tasks.register('guiTest', Test) {
+    description = 'Runs JavaFX interaction scenarios on a desktop (or under xvfb on Linux).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'gui'
+    }
+    systemProperty 'prism.order', 'sw'
+    systemProperty 'staniz.gui.artifacts', layout.buildDirectory.dir('gui-test').get().asFile.absolutePath
+    enableAssertions = true
+    failFast = true
+    testLogging {
+        events 'passed', 'failed'
+        showStandardStreams = true
+        exceptionFormat = 'full'
     }
 }
 
@@ -82,7 +111,7 @@ pitest {
     pitestVersion = '1.25.8'
     junit5PluginVersion = '1.2.3'
     targetClasses = ['staniz.*']
-    targetTests = ['staniz.*']
+    targetTests = ['staniz.model.*', 'staniz.service.*', 'staniz.storage.*']
     excludedClasses = ['staniz.gui.*']
     threads = 4
     mutators = ['DEFAULTS']
@@ -108,5 +137,4 @@ shadowJar {
 
 run {
     enableAssertions = true
-    standardInput = System.in
 }

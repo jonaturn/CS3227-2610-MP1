@@ -1,5 +1,20 @@
 # Project context
 
+## Session continuity
+
+At the start of each session, read `CODEX_SESSION_HANDOFF.md` before continuing work.
+Keep that handoff updated after significant decisions, approved changes, and checks,
+and before ending a session or an anticipated context transition. Record pending work,
+approval boundaries, and whether verification results are current or historical.
+Do not depend solely on conversation compaction for continuity. The assistant cannot
+manually clear conversation context or disable automatic compaction; the user can
+start a fresh session, which should resume from this handoff.
+
+During the current file-by-file code review, explain each concern and proposed fix
+and wait for the user's approval before changing code, including temporary diagnostic
+programs. Updating the handoff itself is authorized. Earlier feature implementation
+approval does not authorize every newly proposed review fix.
+
 This repository is a starter template for a greenfield Java project used in an introductory software engineering course in an undergraduate computer science program. Students use it as the starting point for their own projects.
 
 # Default user context
