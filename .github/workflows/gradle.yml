@@ -22,4 +22,9 @@ jobs:
           java-version: '25'
           java-package: jdk+fx
       - name: Build and check with Gradle
-        run: ./gradlew check
+        # shadowJar is included so the released JAR is proven to package on every platform,
+        # not only when it is rebuilt by hand before a submission.
+        run: ./gradlew check shadowJar
+      - name: Exercise JavaFX controls on a virtual desktop
+        if: runner.os == 'Linux'
+        run: xvfb-run -a ./gradlew guiTest

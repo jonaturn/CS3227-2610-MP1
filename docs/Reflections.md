@@ -1,5 +1,11 @@
 # Reflection on Using AI Tools
 
+> Context: the main body of this reflection describes the original task-manager
+> implementation, built with Codex. The final section covers the workout-app
+> conversion and the file-by-file review that followed, which were completed with
+> Codex and then with Claude Code. The development interaction summary and prompt
+> log record that work in detail.
+
 **Jonathen Cheng Yuzhe - A0273210W**
 
 I built Staniz using Codex as the primary implementation tool across the
@@ -177,3 +183,46 @@ against the brief, as that is precisely the category the AI gets confidently
 wrong. Overall, it was better to keep decision-making responsibility myself
 while handing technical work to the agent and manually checking the result for
 correctness.
+
+## The workout conversion and the review that followed
+
+The reflection above covers the task-manager implementation. Converting Staniz
+into a workout planner, and then reviewing it file by file, raised a different
+set of questions. Most of them were about deciding what not to do.
+
+### Deciding what not to validate
+
+During the storage review the agent argued that rejecting unknown JSON keys would
+be more consistent with the validation rules I had already committed to. It would
+also catch a typo like kgs written next to a valid kg. The argument was sound on
+its own terms. I still said no. Users are not meant to hand edit the save file,
+and once that assumption is stated plainly, most of the concern disappears.
+CS2103 drilled this in. Who is expected to touch a thing is a design input, not a
+detail you settle afterwards. Several of our decisions in that module turned on
+the same question. The agent could lay out the trade-off accurately but it could
+not decide whose file this was.
+
+### Deciding what not to build
+
+The same reasoning applied to the history view resetting its filters on every
+refresh. The agent proposed preserving the filter and selection state. I decided
+a reset was acceptable. Searching again costs the user a moment, while
+remembering the state costs real code and adds another way for things to go
+wrong. Not every problem that gets identified is worth fixing.
+
+### A design property that earned its keep
+
+Staniz writes to a temporary file and moves it into place instead of writing over
+the save directly. Every failure we deliberately injected during the review left
+the saved file untouched and recoverable. That property was decided early and it
+paid for itself many times over. A rejected load, a failed save, and a simulated
+disk failure in the middle of a session all ended with the previous state intact.
+
+### Being reminded of my own decisions
+
+At one point I questioned how exceptions and their messages were being asserted
+in the tests. I then found that I had approved that exact refactoring myself
+earlier in the same session. My earlier reflection noted that the AI forgets
+standing instructions as its context grows. I had not expected to be the one
+forgetting. It was a good argument for writing decisions down somewhere they can
+be read again, instead of relying on either side to remember them.

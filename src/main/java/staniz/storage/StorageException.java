@@ -1,7 +1,7 @@
-package staniz.exception;
+package staniz.storage;
 
 /**
- * Represents a failure to read or write Staniz task data.
+ * Represents a failure to read or write Staniz workout data.
  */
 public class StorageException extends Exception {
 
